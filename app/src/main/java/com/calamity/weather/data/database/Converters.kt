@@ -6,13 +6,17 @@ import com.calamity.weather.data.api.Weather
 import com.calamity.weather.data.api.subclasses.*
 import com.google.gson.Gson
 
+
 class Converters {
     private val gson = Gson()
 
     @TypeConverter
     fun fromApiResponseWrapper(value: ApiResponseWrapper?): String? = gson.toJson(value)
     @TypeConverter
-    fun toApiResponseWrapper(value: String?): ApiResponseWrapper = gson.fromJson(value, ApiResponseWrapper::class.java)
+    fun toApiResponseWrapper(value: String?): ApiResponseWrapper = gson.fromJson(
+        value,
+        ApiResponseWrapper::class.java
+    )
 
     @TypeConverter
     fun coordToString(value: Coord?): String? = gson.toJson(value)
@@ -22,7 +26,10 @@ class Converters {
     @TypeConverter
     fun fromWeatherCondition(value: WeatherCondition?): String = gson.toJson(value)
     @TypeConverter
-    fun toWeatherCondition(value: String?): WeatherCondition = gson.fromJson(value, WeatherCondition::class.java)
+    fun toWeatherCondition(value: String?): WeatherCondition = gson.fromJson(
+        value,
+        WeatherCondition::class.java
+    )
 
     @TypeConverter
     fun fromWeatherMain(value: WeatherMain?): String = gson.toJson(value)
@@ -42,7 +49,10 @@ class Converters {
     @TypeConverter
     fun fromWeatherSystem(value: WeatherSystem?): String = gson.toJson(value)
     @TypeConverter
-    fun toWeatherSystem(value: String?): WeatherSystem = gson.fromJson(value, WeatherSystem::class.java)
+    fun toWeatherSystem(value: String?): WeatherSystem = gson.fromJson(
+        value,
+        WeatherSystem::class.java
+    )
 
     @TypeConverter
     fun fromWeather(value: Weather?): String = gson.toJson(value)
@@ -52,17 +62,14 @@ class Converters {
     @TypeConverter
     fun fromCurrentWeather(value: CurrentWeather?): String = gson.toJson(value)
     @TypeConverter
-    fun toCurrentWeather(value: String?): CurrentWeather = gson.fromJson(value, CurrentWeather::class.java)
+    fun toCurrentWeather(value: String?): CurrentWeather = gson.fromJson(
+        value,
+        CurrentWeather::class.java
+    )
 
     @TypeConverter
-    fun fromWeatherConditions(value: List<WeatherCondition>): String = value.joinToString(",")
+    fun fromWeatherConditions(value: List<WeatherCondition>): String = gson.toJson(value)
     @TypeConverter
-    fun toWeatherConditions(value: String?): List<WeatherCondition> {
-        val list = ArrayList<WeatherCondition>()
-        value!!.split(',').forEach {
-            list.add(toWeatherCondition(it))
-        }
-        return list.toList()
-    }
+    fun toWeatherConditions(value: String?): List<WeatherCondition> = gson.fromJson(value, Array<WeatherCondition>::class.java).toList()
 
 }

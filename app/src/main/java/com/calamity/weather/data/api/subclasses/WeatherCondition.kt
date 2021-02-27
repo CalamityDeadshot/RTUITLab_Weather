@@ -1,5 +1,6 @@
 package com.calamity.weather.data.api.subclasses
 
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
 data class WeatherCondition(
@@ -8,4 +9,7 @@ data class WeatherCondition(
     @SerializedName("description") var description: String,
     @SerializedName("icon") var icon: String
 ) {
+    override fun toString(): String {
+        return Gson().toJson(this)
+    }
 }
