@@ -8,6 +8,9 @@ apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
+    buildFeatures {
+        dataBinding true
+    }
 
     defaultConfig {
         applicationId "com.calamity.weather"
@@ -41,8 +44,10 @@ android {
 }
 
 dependencies {
-    // MVVM
+
+    // MVVM + LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.3.0"
 
     // Room
     implementation "androidx.room:room-runtime:2.2.6"
@@ -67,12 +72,14 @@ dependencies {
     implementation "androidx.hilt:hilt-lifecycle-viewmodel:$hiltAndroidXVersion"
     kapt "androidx.hilt:hilt-compiler:$hiltAndroidXVersion"
 
+    // Expandable View
+    implementation 'com.github.florent37:expansionpanel:1.2.4'
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    //testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }

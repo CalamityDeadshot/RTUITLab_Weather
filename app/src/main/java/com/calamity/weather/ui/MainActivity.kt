@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val service = RetrofitClientInstance.getRetrofitInstance()!!.create(GetDataService::class.java)
+        /*val service = RetrofitClientInstance.getRetrofitInstance()!!.create(GetDataService::class.java)
         val call = service.getCurrentWeather(RetrofitClientInstance.API_KEY, "Moscow,129,ru", "metric", "en")
         call.enqueue(object : Callback<ApiResponseWrapper> {
             override fun onResponse(
@@ -37,6 +37,6 @@ class MainActivity : AppCompatActivity() {
                 Log.v("retrofit", "call failed: ${t.message}")
             }
 
-        })
+        })*/
     }
 }
