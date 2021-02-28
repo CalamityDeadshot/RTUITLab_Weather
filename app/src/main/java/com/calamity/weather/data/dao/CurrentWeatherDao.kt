@@ -10,6 +10,9 @@ interface CurrentWeatherDao {
     @Query("SELECT * FROM current_weather")
     fun getCurrentWeather(): Flow<List<CurrentWeather>>
 
+    @Query("SELECT * FROM current_weather")
+    fun getCurrentWeatherAsList(): List<CurrentWeather>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(weather: CurrentWeather)
 
