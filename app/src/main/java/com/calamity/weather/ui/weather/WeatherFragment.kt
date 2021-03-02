@@ -208,9 +208,15 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity as MainActivity)
 
         fusedLocationClient.lastLocation.addOnSuccessListener {
+            if (it == null) {
+                Toast.makeText(requireContext(), "Error getting location. Add cities manually", Toast.LENGTH_LONG).show()
+                return@addOnSuccessListener
+            }
             viewLifecycleOwner.lifecycleScope.launch {
                 weatherViewModel.addGpsWeather(it.latitude, it.longitude)
             }
+        }.addOnFailureListener {
+            it.printStackTrace()
         }
 
     }
