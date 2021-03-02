@@ -12,12 +12,14 @@
             android:layout_width="match_parent"
             app:expansion_headerIndicator="@id/headerIndicator"
             app:expansion_layout="@id/expansionLayout"
-            app:expansion_toggleOnClick="true">
+            android:animateLayoutChanges="true"
+            app:expansion_toggleOnClick="true"
+            android:elevation="4dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/background_current_weather"
+                android:background="@drawable/background_city_item"
                 android:padding="16dp">
 
                 <TextView
@@ -77,12 +79,16 @@
             android:id="@+id/expansionLayout"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            tools:expansion_expanded="true">
+            tools:expansion_expanded="true"
+            android:layout_marginTop="-16dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
+                android:paddingTop="36dp"
+                android:paddingBottom="16dp"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp"
                 android:background="@android:color/holo_purple">
 
                 <TextView
