@@ -74,10 +74,26 @@ class WeatherRepository @Inject constructor(
                             call: Call<CurrentWeather>,
                             response: Response<CurrentWeather>
                         ) {
+
                            GlobalScope.launch {
-                               database.currentWeatherDao().insert(
-                                   response.body()!!.apply { isLocationEntry = true }
-                               )
+
+                               var isNewLocationEntry = true
+
+                               for (weather in database.currentWeatherDao().getCurrentWeatherAsList()) {
+                                   if (weather.isLocationEntry) {
+                                       val same = weather.cityId == response.body()!!.cityId
+                                       if (!same) {
+                                           database.currentWeatherDao().delete(weather)
+                                       }
+                                       isNewLocationEntry = !same
+                                       break
+                                   }
+                               }
+
+                               if (isNewLocationEntry)
+                                   database.currentWeatherDao().insert(
+                                       response.body()!!.apply { isLocationEntry = true }
+                                   )
                            }
                         }
 

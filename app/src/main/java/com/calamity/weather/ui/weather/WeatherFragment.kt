@@ -60,6 +60,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
         viewLifecycleOwner.lifecycleScope.launch {
             weatherViewModel.update()
+            getWeatherByLocation()
         }
     }
 
@@ -120,6 +121,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         recycler_swipe_layout.setOnRefreshListener {
             viewLifecycleOwner.lifecycleScope.launch {
                 weatherViewModel.update()
+                getWeatherByLocation()
                 recycler_swipe_layout.isRefreshing = false
             }
         }
@@ -202,6 +204,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
     @SuppressLint("MissingPermission") // Only called if permission is granted from onRequestPermissionsResult
     private fun getWeatherByLocation() {
+        if (!gpsPermissionGranted()) return
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity as MainActivity)
 
         fusedLocationClient.lastLocation.addOnSuccessListener {
