@@ -7,24 +7,42 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.calamity.weather.data.api.CurrentWeather
+import com.calamity.weather.R
+import com.calamity.weather.data.api.openweather.CurrentWeather
 import com.calamity.weather.databinding.ItemCurrentWeatherBinding
+import com.github.florent37.expansionpanel.viewgroup.ExpansionLayoutCollection
 
-class CurrentWeatherAdapter : ListAdapter<CurrentWeather, CurrentWeatherAdapter.WeatherViewHolder>(DiffCallback()) {
 
-    class WeatherViewHolder(private val binding: ItemCurrentWeatherBinding) : RecyclerView.ViewHolder(binding.root) {
+class WeatherAdapter : ListAdapter<CurrentWeather, WeatherAdapter.WeatherViewHolder>(DiffCallback()) {
+
+    private val expansionsCollection = ExpansionLayoutCollection().apply { openOnlyOne(true) }
+
+    inner class WeatherViewHolder(private val binding: ItemCurrentWeatherBinding) : RecyclerView.ViewHolder(
+        binding.root
+    ) {
+
 
         fun bind(weather: CurrentWeather) {
             binding.apply {
                 locationName.text = weather.cityName
+                locationName.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    if (weather.isLocationEntry) R.drawable.ic_location_24dp else 0,
+                    0, 0, 0
+                )
                 conditions.text = weather.weatherConditions[0].main
                 temperature.text = "${Math.round(weather.main.temp!!)}°"
+                expansionsCollection.add(expansionLayout)
+                today.append(" · ")
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WeatherViewHolder {
-        val binding = ItemCurrentWeatherBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemCurrentWeatherBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
         return WeatherViewHolder(binding)
     }
 

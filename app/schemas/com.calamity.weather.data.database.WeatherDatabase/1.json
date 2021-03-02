@@ -2,12 +2,18 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "9995c2f0c07b4a87ce7bed7bbcdda729",
+    "identityHash": "9becb78a2852df3518651ed2e6f5df21",
     "entities": [
       {
         "tableName": "current_weather",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`db_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `coordinates` TEXT NOT NULL, `weatherConditions` TEXT NOT NULL, `main` TEXT NOT NULL, `visibility` INTEGER NOT NULL, `wind` TEXT NOT NULL, `clouds` TEXT NOT NULL, `calculationTime` INTEGER NOT NULL, `weatherSystem` TEXT NOT NULL, `timezone` INTEGER NOT NULL, `cityId` INTEGER NOT NULL, `cityName` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`isLocationEntry` INTEGER NOT NULL, `db_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `coordinates` TEXT NOT NULL, `weatherConditions` TEXT NOT NULL, `main` TEXT NOT NULL, `visibility` INTEGER NOT NULL, `wind` TEXT NOT NULL, `clouds` TEXT NOT NULL, `calculationTime` INTEGER NOT NULL, `weatherSystem` TEXT NOT NULL, `timezone` INTEGER NOT NULL, `cityId` INTEGER NOT NULL, `cityName` TEXT NOT NULL)",
         "fields": [
+          {
+            "fieldPath": "isLocationEntry",
+            "columnName": "isLocationEntry",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "db_id",
             "columnName": "db_id",
@@ -92,7 +98,7 @@
       },
       {
         "tableName": "weather",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `timezone` INTEGER NOT NULL, `timezoneOffset` INTEGER NOT NULL, `weather` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `timezone` TEXT NOT NULL, `timezoneOffset` INTEGER NOT NULL, `weather` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -115,7 +121,7 @@
           {
             "fieldPath": "timezone",
             "columnName": "timezone",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -144,7 +150,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9995c2f0c07b4a87ce7bed7bbcdda729')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9becb78a2852df3518651ed2e6f5df21')"
     ]
   }
 }

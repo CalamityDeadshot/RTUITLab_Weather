@@ -70,7 +70,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         if (list.isEmpty()) {
             if (switcher.currentView.id == R.id.cities_recycler)
                 switcher.showNext()
-                
+
         } else if (switcher.currentView.id == R.id.empty)
             switcher.showNext()
     }
