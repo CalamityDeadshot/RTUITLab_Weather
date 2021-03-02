@@ -28,4 +28,6 @@ data class CurrentWeather(
     @SerializedName("name") var cityName: String,
     var isLocationEntry: Boolean
 ) {
+    // Used to delete entries from inside search screen
+    var placeId: String? = null
 }

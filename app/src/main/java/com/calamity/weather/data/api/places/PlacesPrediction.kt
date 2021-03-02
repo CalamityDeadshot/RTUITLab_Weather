@@ -8,8 +8,10 @@ data class PlacesPrediction(
     val fullText: String,
     val latitude: Double,
     val longitude: Double,
-    val placeId: String
-) {
+    val placeId: String,
+    var isAdded: Boolean = false,
     @PrimaryKey(autoGenerate = true) var id: Int = 0
+) {
+
 
 }

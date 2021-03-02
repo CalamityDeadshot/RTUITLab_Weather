@@ -10,15 +10,30 @@ import androidx.recyclerview.widget.RecyclerView
 import com.calamity.weather.data.api.places.PlacesPrediction
 import com.calamity.weather.databinding.ItemCityToAddBinding
 
-class CitiesAdapter : ListAdapter<PlacesPrediction, CitiesAdapter.CityViewHolder>(DiffCallback()) {
+class CitiesAdapter(private val listener: OnItemClickListener) : ListAdapter<PlacesPrediction, CitiesAdapter.CityViewHolder>(DiffCallback()) {
 
     inner class CityViewHolder(private val binding: ItemCityToAddBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            binding.apply {
+                btnAdd.setOnClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        val place = getItem(position)
+                        btnAdd.animate().rotation(if (place.isAdded) 45f else 0f).start()
+                        println("Current item state (isAdded): ${place.isAdded}")
+                        listener.onAddClick(place, !place.isAdded)
+                    }
+                }
+            }
+        }
+
         fun bind(prediction : PlacesPrediction) {
             binding.apply {
-                //val countryName = prediction.fullText.split(", ").last()
                 val cityName = prediction.fullText.split(", ")[0]
                 locationName.text = cityName
                 fullName.text = prediction.fullText
+                btnAdd.animate().rotation(if (prediction.isAdded) 45f else 0f).start()/*.rotation = if (prediction.isAdded) 45f else 0f*/
             }
         }
     }
@@ -34,6 +49,10 @@ class CitiesAdapter : ListAdapter<PlacesPrediction, CitiesAdapter.CityViewHolder
 
     override fun onBindViewHolder(holder: CityViewHolder, position: Int) {
         holder.bind(getItem(position))
+    }
+
+    interface OnItemClickListener {
+        fun onAddClick(place: PlacesPrediction, isAdded: Boolean)
     }
 
     class DiffCallback : DiffUtil.ItemCallback<PlacesPrediction>() {

@@ -2,6 +2,7 @@ package com.calamity.weather.data.repository
 
 import com.calamity.weather.data.api.places.PlacesPrediction
 import com.calamity.weather.data.database.AutocompleteDatabase
+import com.calamity.weather.data.database.WeatherDatabase
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.api.net.*
@@ -14,7 +15,8 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class AutocompleteRepository @Inject constructor(
-    private val database: AutocompleteDatabase
+    private val database: AutocompleteDatabase,
+    private val weatherDatabase: WeatherDatabase
 ) {
     private var client: PlacesClient? = null
 
@@ -30,42 +32,65 @@ class AutocompleteRepository @Inject constructor(
                 .setTypeFilter(TypeFilter.REGIONS)
                 .build()
 
-            val present = database.dao().getPredictionsAsList()
 
             client!!.findAutocompletePredictions(request).addOnSuccessListener { response ->
                 for (prediction in response.autocompletePredictions) {
+                    GlobalScope.launch {
+                        val present = database.dao().getPredictionsAsList()
 
-                    // Checking if a place with this id is already present
-                    var needSecondApiCall = true
-                    for (place in present) {
-                        if (place.placeId == prediction.placeId) {
-                            needSecondApiCall = false
-                            break
-                        }
-                    }
-                    // Skipping second API call if it is
-                    if (!needSecondApiCall) continue
-
-                    val coordinatesRequest = FetchPlaceRequest.newInstance(prediction.placeId, listOf(Place.Field.LAT_LNG))
-                    client!!.fetchPlace(coordinatesRequest)
-                        .addOnSuccessListener { response2: FetchPlaceResponse ->
-                            //val predictions = ArrayList<PlacesPrediction>()
-                            val coordinates = response2.place.latLng!!
-                            val text = prediction.getFullText(null)
-                            val countryName = text.split(", ").last()
-                            val cityName = text.split(", ")[0]
-                            //predictions.add(PlacesPrediction(countryName, cityName, coordinates.latitude, coordinates.longitude))
-
-                            val v = PlacesPrediction(prediction.getFullText(null).toString(), coordinates.latitude, coordinates.longitude, prediction.placeId)
-                            GlobalScope.launch {
-                                database.dao().insert(v)
+                        // Checking if a place with this id is already present
+                        var needSecondApiCall = true
+                        for (place in present) {
+                            if (place.placeId == prediction.placeId) {
+                                needSecondApiCall = false
+                                break
                             }
                         }
+                        // Skipping second API call if it is
+                        if (needSecondApiCall) {
+
+                            val coordinatesRequest = FetchPlaceRequest.newInstance(
+                                prediction.placeId,
+                                listOf(Place.Field.LAT_LNG)
+                            )
+                            client!!.fetchPlace(coordinatesRequest)
+                                .addOnSuccessListener { response2: FetchPlaceResponse ->
+                                    val coordinates = response2.place.latLng!!
+
+                                    GlobalScope.launch {
+
+                                        var isAdded = false
+
+                                        for (weather in weatherDatabase.currentWeatherDao()
+                                            .getCurrentWeatherAsList()) {
+                                            if (weather.placeId == prediction.placeId) {
+                                                isAdded = true
+                                                break
+                                            }
+                                        }
+
+                                        val v = PlacesPrediction(
+                                            prediction.getFullText(null).toString(),
+                                            coordinates.latitude,
+                                            coordinates.longitude,
+                                            prediction.placeId,
+                                            isAdded
+                                        )
+
+                                        database.dao().insert(v)
+                                    }
+                                }
+                        }
+                    }
                 }
             }
         }
         return database.dao().getPredictions(query)
     }
+
+    // Workaround and cringe. Need refactoring
+    suspend fun update(place: PlacesPrediction, added: Boolean) =
+        database.dao().insert(place.copy(isAdded = added, id = place.id))//update(place.copy(isAdded = added))
 
     suspend fun clearDb() {
         withContext(Dispatchers.IO) {
@@ -73,4 +98,6 @@ class AutocompleteRepository @Inject constructor(
             database.dao().nuke()
         }
     }
+
+    suspend fun getPredictionsAsList(query: String) = database.dao().getPredictionsAsList(query)
 }

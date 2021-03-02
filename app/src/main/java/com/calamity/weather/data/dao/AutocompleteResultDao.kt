@@ -11,12 +11,14 @@ interface AutocompleteResultDao {
     @Query("SELECT * FROM autocomplete_table WHERE (fullText LIKE '%' || :searchQuery || '%') AND (:searchQuery != '') ORDER BY id ASC")
     fun getPredictions(searchQuery: String) : Flow<List<PlacesPrediction>>
     @Query("SELECT * FROM autocomplete_table")
-    fun getPredictionsAsList() : List<PlacesPrediction>
+    suspend fun getPredictionsAsList() : List<PlacesPrediction>
+    @Query("SELECT * FROM autocomplete_table WHERE (fullText LIKE '%' || :searchQuery || '%') AND (:searchQuery != '') ORDER BY id ASC")
+    suspend fun getPredictionsAsList(searchQuery: String) : List<PlacesPrediction>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(prediction: PlacesPrediction)
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(prediction: PlacesPrediction)
 
     @Delete

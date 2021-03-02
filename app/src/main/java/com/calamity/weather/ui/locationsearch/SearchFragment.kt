@@ -4,23 +4,29 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.calamity.weather.R
 import com.calamity.weather.data.api.places.PlacesPrediction
 import com.calamity.weather.databinding.FragmentSearchBinding
 import com.calamity.weather.ui.adapters.CitiesAdapter
+import com.calamity.weather.ui.weather.CurrentWeatherViewModel
 import com.calamity.weather.utils.PlacesApi
 import com.calamity.weather.utils.onQueryTextChanged
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.*
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_weather.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class SearchFragment : Fragment(R.layout.fragment_search) {
+class SearchFragment : Fragment(R.layout.fragment_search), CitiesAdapter.OnItemClickListener {
 
     private val viewModel: SearchViewModel by viewModels()
 
@@ -37,10 +43,19 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         initBinding(view)
     }
 
+    override fun onAddClick(place: PlacesPrediction, isAdded: Boolean) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.onAddPlace(place, isAdded)
+        }
+        //viewModel.searchQuery.value = viewModel.searchQuery.value
+        println("Parameter passed to onClick: $isAdded, placeId = ${place.placeId}")
+        Toast.makeText(requireContext(), place.placeId, Toast.LENGTH_LONG).show()
+    }
+
     private fun initBinding(view: View) {
         val binding = FragmentSearchBinding.bind(view)
 
-        val citiesAdapter = CitiesAdapter()
+        val citiesAdapter = CitiesAdapter(this)
 
         binding.apply {
             citiesRecycler.apply {
@@ -58,11 +73,18 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         }
 
         viewModel.predictions.observe(viewLifecycleOwner) {
-            it.forEach { place ->
-                println("${place.fullText}\n")
-            }
             citiesAdapter.submitList(it)
             handleEmptyList(it)
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.event.collect { event ->
+                when (event) {
+                    is SearchViewModel.UpdateEvent.UpdateList -> {
+                        citiesAdapter.submitList(event.list)
+                    }
+                }
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.calamity.weather.data.repository
 import android.util.Log
 import com.calamity.weather.data.api.openweather.CurrentWeather
 import com.calamity.weather.data.api.openweather.Weather
+import com.calamity.weather.data.api.places.PlacesPrediction
 import com.calamity.weather.data.database.WeatherDatabase
 import com.calamity.weather.data.retrofit.WeatherService
 import com.calamity.weather.data.retrofit.RetrofitClientInstance
@@ -107,6 +108,36 @@ class WeatherRepository @Inject constructor(
     fun getCurrentWeather(searchQuery: String) = database.currentWeatherDao().getCurrentWeather(searchQuery)
 
     fun getWeather() = database.weatherDao().getWeather()
+
+    suspend fun addWeather(place: PlacesPrediction) {
+        withContext(Dispatchers.IO) {
+            service.getCurrentWeather(RetrofitClientInstance.API_KEY, place.latitude, place.longitude, "metric", "en")
+                .enqueue(object : retrofit2.Callback<CurrentWeather> {
+                    override fun onResponse(
+                        call: Call<CurrentWeather>,
+                        response: Response<CurrentWeather>
+                    ) {
+
+                        GlobalScope.launch {
+                            database.currentWeatherDao().insert(response.body()!!.apply { placeId = place.placeId })
+                        }
+                    }
+
+                    override fun onFailure(call: Call<CurrentWeather>, t: Throwable) {
+                        Log.v("retrofit", "call failed: ${t.message}")
+                    }
+                })
+        }
+    }
+
+    suspend fun delete(place: PlacesPrediction) {
+        withContext(Dispatchers.IO) {
+            for (weather in database.currentWeatherDao().getCurrentWeatherAsList()) {
+                if (weather.placeId == place.placeId)
+                    database.currentWeatherDao().delete(weather)
+            }
+        }
+    }
 
     fun delete(weather: CurrentWeather) = GlobalScope.launch {
         database.currentWeatherDao().delete(weather)

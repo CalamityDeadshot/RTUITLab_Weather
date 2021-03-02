@@ -2,17 +2,17 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "9becb78a2852df3518651ed2e6f5df21",
+    "identityHash": "261387384beb014ef4e32006a21b3d09",
     "entities": [
       {
         "tableName": "current_weather",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`isLocationEntry` INTEGER NOT NULL, `db_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `coordinates` TEXT NOT NULL, `weatherConditions` TEXT NOT NULL, `main` TEXT NOT NULL, `visibility` INTEGER NOT NULL, `wind` TEXT NOT NULL, `clouds` TEXT NOT NULL, `calculationTime` INTEGER NOT NULL, `weatherSystem` TEXT NOT NULL, `timezone` INTEGER NOT NULL, `cityId` INTEGER NOT NULL, `cityName` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`placeId` TEXT, `db_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `coordinates` TEXT NOT NULL, `weatherConditions` TEXT NOT NULL, `main` TEXT NOT NULL, `visibility` INTEGER NOT NULL, `wind` TEXT NOT NULL, `clouds` TEXT NOT NULL, `calculationTime` INTEGER NOT NULL, `weatherSystem` TEXT NOT NULL, `timezone` INTEGER NOT NULL, `cityId` INTEGER NOT NULL, `cityName` TEXT NOT NULL, `isLocationEntry` INTEGER NOT NULL)",
         "fields": [
           {
-            "fieldPath": "isLocationEntry",
-            "columnName": "isLocationEntry",
-            "affinity": "INTEGER",
-            "notNull": true
+            "fieldPath": "placeId",
+            "columnName": "placeId",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "db_id",
@@ -85,6 +85,12 @@
             "columnName": "cityName",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "isLocationEntry",
+            "columnName": "isLocationEntry",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -150,7 +156,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9becb78a2852df3518651ed2e6f5df21')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '261387384beb014ef4e32006a21b3d09')"
     ]
   }
 }
