@@ -1,4 +1,4 @@
-package com.calamity.weather.data.api.subclasses
+package com.calamity.weather.data.api.openweather.subclasses
 
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName

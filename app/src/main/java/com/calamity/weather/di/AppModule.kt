@@ -2,6 +2,7 @@ package com.calamity.weather.di
 
 import android.app.Application
 import androidx.room.Room
+import com.calamity.weather.data.database.AutocompleteDatabase
 import com.calamity.weather.data.database.WeatherDatabase
 import dagger.Module
 import dagger.Provides
@@ -26,9 +27,21 @@ object AppModule {
             .build()
 
     @Provides
+    @Singleton
+    fun providePredictionsDatabase(
+        app: Application,
+        callback: AutocompleteDatabase.Callback
+    ) = Room.databaseBuilder(app, AutocompleteDatabase::class.java, "autocomplete_database")
+        .fallbackToDestructiveMigration()
+        .addCallback(callback)
+        .build()
+
+    @Provides
     fun provideWeatherDao(db: WeatherDatabase) = db.weatherDao()
     @Provides
     fun provideCurrentWeatherDao(db: WeatherDatabase) = db.currentWeatherDao()
+    @Provides
+    fun provideAutocompleteDao(db: AutocompleteDatabase) = db.dao()
 
     @ApplicationScope
     @Provides

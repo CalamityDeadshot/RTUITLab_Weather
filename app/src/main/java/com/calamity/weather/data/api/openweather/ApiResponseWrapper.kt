@@ -1,4 +1,4 @@
-package com.calamity.weather.data.api
+package com.calamity.weather.data.api.openweather
 
 import com.google.gson.annotations.SerializedName
 

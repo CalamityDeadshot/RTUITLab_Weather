@@ -1,9 +1,9 @@
 package com.calamity.weather.data.database
 
 import androidx.room.TypeConverter
-import com.calamity.weather.data.api.ApiResponseWrapper
-import com.calamity.weather.data.api.Weather
-import com.calamity.weather.data.api.subclasses.*
+import com.calamity.weather.data.api.openweather.ApiResponseWrapper
+import com.calamity.weather.data.api.openweather.Weather
+import com.calamity.weather.data.api.openweather.subclasses.*
 import com.google.gson.Gson
 
 
