@@ -30,7 +30,8 @@
                     android:maxLines="1"
                     android:textColor="@color/white"
                     android:textSize="24sp"
-                    tools:text="Moscow" />
+                    tools:text="Moscow"
+                    tools:drawableStart="@drawable/ic_location_24dp"/>
 
                 <TextView
                     android:id="@+id/conditions"
