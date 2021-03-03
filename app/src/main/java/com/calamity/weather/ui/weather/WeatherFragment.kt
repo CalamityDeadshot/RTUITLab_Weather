@@ -145,23 +145,40 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     // Otherwise, the list will not be empty because an entry with weather by location will be created.
     private fun handleEmptyList(list: List<CurrentWeather>) {
         if (list.isEmpty()) {
-            if (switcher.currentView.id == R.id.recycler_swipe_layout) {
-                if (isInternetAvailable()) {
-                    if (!gpsPermissionGranted()) {
-                        empty_img_no_connection.visibility = View.GONE
-                        empty_img_no_gps.visibility = View.VISIBLE
-                        btn_retry.visibility = View.GONE
-                        text_empty.text = resources.getString(R.string.no_gps)
+            when (switcher.currentView.id) {
+                // Case empty list is visible
+                R.id.recycler_swipe_layout -> {
+                    if (isInternetAvailable()) {
+                        if (!gpsPermissionGranted()) {
+                            empty_img_no_connection.visibility = View.GONE
+                            empty_img_no_gps.visibility = View.VISIBLE
+                            btn_retry.visibility = View.GONE
+                            text_empty.text = resources.getString(R.string.no_gps)
+                        } else {
+                            getWeatherByLocation()
+                        }
                     } else {
-                        getWeatherByLocation()
+                        empty_img_no_connection.visibility = View.VISIBLE
+                        empty_img_no_gps.visibility = View.GONE
+                        btn_retry.visibility = View.VISIBLE
+                        text_empty.text = resources.getString(R.string.no_internet)
                     }
-                } else {
-                    empty_img_no_connection.visibility = View.VISIBLE
-                    empty_img_no_gps.visibility = View.GONE
-                    btn_retry.visibility = View.VISIBLE
-                    text_empty.text = resources.getString(R.string.no_internet)
+                    switcher.showNext()
                 }
-                switcher.showNext()
+                // Case empty message is visible: required to process Retry action
+                else -> {
+                    if (isInternetAvailable()) {
+                        if (!gpsPermissionGranted()) {
+                            empty_img_no_connection.visibility = View.GONE
+                            empty_img_no_gps.visibility = View.VISIBLE
+                            btn_retry.visibility = View.GONE
+                            text_empty.text = resources.getString(R.string.no_gps)
+                        } else {
+                            getWeatherByLocation()
+                            switcher.showNext()
+                        }
+                    }
+                }
             }
         } else if (switcher.currentView.id == R.id.empty)
             switcher.showNext()
@@ -171,7 +188,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     @Suppress("DEPRECATION")
     fun requestGpsPermission() {
         if (gpsPermissionGranted()) return
-
 
         requestPermissions(
             arrayOf(
