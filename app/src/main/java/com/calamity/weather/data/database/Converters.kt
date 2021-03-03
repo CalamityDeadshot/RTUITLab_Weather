@@ -4,7 +4,12 @@ import androidx.room.TypeConverter
 import com.calamity.weather.data.api.openweather.ApiResponseWrapper
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.data.api.openweather.subclasses.*
+import com.calamity.weather.data.api.openweather.subclasses.current.*
+import com.calamity.weather.data.api.openweather.subclasses.onecall.CurrentWeather
+import com.calamity.weather.data.api.openweather.subclasses.onecall.DailyWeather
+import com.calamity.weather.data.api.openweather.subclasses.onecall.HourlyWeather
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 
 class Converters {
@@ -71,5 +76,20 @@ class Converters {
     fun fromWeatherConditions(value: List<WeatherCondition>): String = gson.toJson(value)
     @TypeConverter
     fun toWeatherConditions(value: String?): List<WeatherCondition> = gson.fromJson(value, Array<WeatherCondition>::class.java).toList()
+
+    @TypeConverter
+    fun fromDaily(value: List<DailyWeather>): String = gson.toJson(value)
+    @TypeConverter
+    fun toDaily(value: String?): List<DailyWeather> = gson.fromJson(value, Array<DailyWeather>::class.java).toList()
+
+    @TypeConverter
+    fun fromHourly(value: List<HourlyWeather>): String = gson.toJson(value)
+    @TypeConverter
+    fun toHourly(value: String?): List<HourlyWeather> = gson.fromJson(value, Array<HourlyWeather>::class.java).toList()
+
+    @TypeConverter
+    fun fromMinutely(value: List<CurrentWeather>): String = gson.toJson(value)
+    @TypeConverter
+    fun toMinutely(value: String?): List<CurrentWeather> = gson.fromJson(value, Array<CurrentWeather>::class.java).toList()
 
 }

@@ -1,9 +1,10 @@
-package com.calamity.weather.data.api.openweather.subclasses
+package com.calamity.weather.data.api.openweather.subclasses.onecall
 
+import com.calamity.weather.data.api.openweather.subclasses.WeatherCondition
 import com.google.gson.annotations.SerializedName
 
 data class CurrentWeather(
-    @SerializedName("dt") var currentTime: Int,
+    @SerializedName("dt") var currentTime: Long,
     @SerializedName("sunrise") var sunriseTime: Int,
     @SerializedName("sunset") var sunsetTime: Int,
     @SerializedName("temp") var temperature: Double,
@@ -15,9 +16,6 @@ data class CurrentWeather(
     @SerializedName("wind_speed") var windSpeed: Float,
     @SerializedName("wind_deg") var windDirection: Float,
     @SerializedName("weather") var weatherConditions: List<WeatherCondition>,
-    @SerializedName("pop") var precipitationProbability: Int?,
-    @SerializedName("hourly") var hourly: List<CurrentWeather>?,
-    @SerializedName("daily") var daily: List<CurrentWeather>?,
-    @SerializedName("minutely") var minutely: List<CurrentWeather>?,
+    @SerializedName("pop") var precipitationProbability: Float?,
 
     )

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c7b2ab1590cb7a0a52950ee6070ff1c6",
+    "identityHash": "49a12c2ba3ef7e37629e30af2bd1ceec",
     "entities": [
       {
         "tableName": "current_weather",
@@ -104,26 +104,8 @@
       },
       {
         "tableName": "weather",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cityName` TEXT NOT NULL, `cityId` INTEGER NOT NULL, `placeId` TEXT, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `timezone` TEXT NOT NULL, `timezoneOffset` INTEGER NOT NULL, `weather` TEXT NOT NULL, `isLocationEntry` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `timezone` TEXT NOT NULL, `timezoneOffset` INTEGER NOT NULL, `weather` TEXT NOT NULL, `hourly` TEXT NOT NULL, `daily` TEXT NOT NULL, `isLocationEntry` INTEGER NOT NULL, `cityName` TEXT NOT NULL, `cityId` INTEGER NOT NULL, `placeId` TEXT)",
         "fields": [
-          {
-            "fieldPath": "cityName",
-            "columnName": "cityName",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cityId",
-            "columnName": "cityId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "placeId",
-            "columnName": "placeId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
           {
             "fieldPath": "id",
             "columnName": "id",
@@ -161,10 +143,40 @@
             "notNull": true
           },
           {
+            "fieldPath": "hourly",
+            "columnName": "hourly",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "daily",
+            "columnName": "daily",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "isLocationEntry",
             "columnName": "isLocationEntry",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "cityName",
+            "columnName": "cityName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cityId",
+            "columnName": "cityId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "placeId",
+            "columnName": "placeId",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -180,7 +192,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c7b2ab1590cb7a0a52950ee6070ff1c6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '49a12c2ba3ef7e37629e30af2bd1ceec')"
     ]
   }
 }

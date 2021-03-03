@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="4dp">
+
+        <TextView
+            android:id="@+id/day_of_week"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/white"
+            tools:text="Fri"/>
+
+        <TextView
+            android:id="@+id/temp_minmax"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/day_of_week"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/white"
+            tools:text="-1° / 7°"/>
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/temp_minmax"
+            tools:src="@drawable/ic_add"
+            tools:tint="@color/white" />
+
+        <ImageView
+            android:id="@+id/icon_wind"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_alignParentStart="true"
+            android:layout_below="@id/icon"
+            android:layout_toStartOf="@id/wind"
+            android:layout_alignBottom="@id/wind"
+            android:src="@drawable/ic_wind_direction"
+            tools:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/wind"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/icon"
+            android:layout_alignEnd="@id/temp_minmax"
+            android:textSize="10sp"
+            android:textColor="@color/white"
+            tools:text="3.0m/s"/>
+
+    </RelativeLayout>
+</layout>

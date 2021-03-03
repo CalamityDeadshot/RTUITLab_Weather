@@ -17,6 +17,7 @@
             android:elevation="4dp">
 
             <RelativeLayout
+                android:id="@+id/header_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/background_city_item"
@@ -89,7 +90,9 @@
                 android:paddingBottom="16dp"
                 android:paddingEnd="16dp"
                 android:paddingStart="16dp"
-                android:background="@android:color/holo_purple">
+                android:background="@android:color/holo_purple"
+                android:clipToPadding="false"
+                android:clipChildren="false">
 
                 <TextView
                     android:id="@+id/today"
@@ -165,6 +168,15 @@
                     android:ellipsize="end"
                     android:textSize="16sp"
                     tools:text="0° / -7°" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/daily_weather_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/after_tomorrow"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_daily"/>
 
             </RelativeLayout>
 

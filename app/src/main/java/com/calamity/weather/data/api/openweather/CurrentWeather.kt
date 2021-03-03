@@ -3,6 +3,7 @@ package com.calamity.weather.data.api.openweather
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.calamity.weather.data.api.openweather.subclasses.*
+import com.calamity.weather.data.api.openweather.subclasses.current.*
 import com.google.gson.annotations.SerializedName
 
 /*

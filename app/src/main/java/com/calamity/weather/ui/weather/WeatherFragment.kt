@@ -67,7 +67,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     private fun initBinding(view: View) {
         val binding = FragmentWeatherBinding.bind(view)
 
-        val weatherAdapter = WeatherAdapter()
+
+        val weatherAdapter = WeatherAdapter(requireContext(), getImageMap())
 
         binding.apply {
             currentWeatherRecycler.apply {
@@ -103,7 +104,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                     recyclerView: RecyclerView,
                     viewHolder: RecyclerView.ViewHolder
                 ): Int {
-                    if (weatherAdapter.currentList[viewHolder.adapterPosition].isLocationEntry) {
+                    if (weatherAdapter.currentList[viewHolder.adapterPosition].isLocationEntry ||
+                        (viewHolder as WeatherAdapter.WeatherViewHolder).viewExpanded) {
                         return 0
                     }
                     return makeMovementFlags(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT)
@@ -267,5 +269,28 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    fun getImageMap(): HashMap<String, Int> {
+        val map = HashMap<String, Int>()
+        map["01d"] = R.drawable.ic_01d
+        map["01n"] = R.drawable.ic_01n
+        map["02d"] = R.drawable.ic_02d
+        map["02n"] = R.drawable.ic_02n
+        map["03d"] = R.drawable.ic_03d
+        map["03n"] = R.drawable.ic_03n
+        map["04d"] = R.drawable.ic_04d
+        map["04n"] = R.drawable.ic_04n
+        map["09d"] = R.drawable.ic_09d
+        map["09n"] = R.drawable.ic_09n
+        map["10d"] = R.drawable.ic_10d
+        map["10n"] = R.drawable.ic_10n
+        map["11d"] = R.drawable.ic_11d
+        map["11n"] = R.drawable.ic_11n
+        map["13d"] = R.drawable.ic_13d
+        map["13n"] = R.drawable.ic_13n
+        map["50d"] = R.drawable.ic_50d
+        map["50n"] = R.drawable.ic_50n
+        return map
     }
 }
