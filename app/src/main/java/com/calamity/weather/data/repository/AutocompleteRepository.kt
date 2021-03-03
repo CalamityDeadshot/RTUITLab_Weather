@@ -88,9 +88,8 @@ class AutocompleteRepository @Inject constructor(
         return database.dao().getPredictions(query)
     }
 
-    // Workaround and cringe. Need refactoring
     suspend fun update(place: PlacesPrediction, added: Boolean) =
-        database.dao().insert(place.copy(isAdded = added, id = place.id))//update(place.copy(isAdded = added))
+        database.dao().update(place.copy(isAdded = added, id = place.id))
 
     suspend fun clearDb() {
         withContext(Dispatchers.IO) {

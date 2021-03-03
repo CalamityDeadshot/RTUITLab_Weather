@@ -216,9 +216,9 @@ class WeatherRepository @Inject constructor(
 
     suspend fun delete(place: PlacesPrediction) {
         withContext(Dispatchers.IO) {
-            for (weather in database.currentWeatherDao().getCurrentWeatherAsList()) {
+            for (weather in database.weatherDao().getWeatherAsList()) {
                 if (weather.placeId == place.placeId)
-                    database.currentWeatherDao().delete(weather)
+                    database.weatherDao().delete(weather)
             }
         }
     }
