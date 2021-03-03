@@ -84,7 +84,7 @@
                         android:layout_centerHorizontal="true"
                         android:background="@drawable/background_retry_button"
                         android:textAllCaps="false"
-                        android:textColor="@android:color/secondary_text_dark"/>
+                        android:textColor="@android:color/tab_indicator_text"/>
 
                 </RelativeLayout>
 
