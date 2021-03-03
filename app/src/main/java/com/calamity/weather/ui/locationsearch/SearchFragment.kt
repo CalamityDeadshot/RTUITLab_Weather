@@ -47,9 +47,6 @@ class SearchFragment : Fragment(R.layout.fragment_search), CitiesAdapter.OnItemC
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.onAddPlace(place, isAdded)
         }
-        //viewModel.searchQuery.value = viewModel.searchQuery.value
-        println("Parameter passed to onClick: $isAdded, placeId = ${place.placeId}")
-        Toast.makeText(requireContext(), place.placeId, Toast.LENGTH_LONG).show()
     }
 
     private fun initBinding(view: View) {
