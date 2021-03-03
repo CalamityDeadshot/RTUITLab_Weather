@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.calamity.weather.R
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.databinding.FragmentWeatherBinding
-import com.calamity.weather.ui.MainActivity
+import com.calamity.weather.ui.mainactivity.MainActivity
 import com.calamity.weather.ui.adapters.WeatherAdapter
 import com.calamity.weather.utils.Variables
 import com.calamity.weather.utils.onQueryTextChanged

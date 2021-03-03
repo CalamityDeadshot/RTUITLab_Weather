@@ -8,4 +8,6 @@
     <string name="retry">Retry</string>
     <string name="add_city">Add city</string>
     <string name="search_empty_text">Tap the search icon to start searching cities</string>
+    <string name="connection_lost">Network connection lost</string>
+    <string name="connection_established">Network connection established</string>
 </resources>
