@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -14,12 +13,10 @@ import com.calamity.weather.R
 import com.calamity.weather.data.api.places.PlacesPrediction
 import com.calamity.weather.databinding.FragmentSearchBinding
 import com.calamity.weather.ui.adapters.CitiesAdapter
-import com.calamity.weather.ui.weather.CurrentWeatherViewModel
 import com.calamity.weather.utils.PlacesApi
 import com.calamity.weather.utils.onQueryTextChanged
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.*
-import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_weather.*
 import kotlinx.coroutines.flow.collect

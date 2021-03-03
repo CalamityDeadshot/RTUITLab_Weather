@@ -7,6 +7,7 @@ import com.calamity.weather.data.api.places.PlacesPrediction
 import com.calamity.weather.data.database.WeatherDatabase
 import com.calamity.weather.data.retrofit.WeatherService
 import com.calamity.weather.data.retrofit.RetrofitClientInstance
+import com.calamity.weather.utils.Variables
 import com.calamity.weather.utils.enqueue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -27,7 +28,7 @@ class WeatherRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             val currentDao = database.currentWeatherDao()
             currentDao.getCurrentWeatherAsList().toList().forEach { weather ->
-                service.getCurrentWeather(RetrofitClientInstance.API_KEY, weather.cityId, "metric", "en")
+                service.getCurrentWeather(RetrofitClientInstance.API_KEY, weather.cityId, Variables.units, Variables.languageCode)
                     .enqueue(object : retrofit2.Callback<CurrentWeather> {
                         override fun onResponse(
                             call: Call<CurrentWeather>,
@@ -47,9 +48,9 @@ class WeatherRepository @Inject constructor(
         }
     }
 
-    suspend fun getWeatherByLocation(lat: Double, lon: Double) {
+    suspend fun getCurrentWeatherByLocation(lat: Double, lon: Double) {
         withContext(Dispatchers.IO) {
-            service.getCurrentWeather(RetrofitClientInstance.API_KEY, lat, lon, "metric", "en")
+            service.getCurrentWeather(RetrofitClientInstance.API_KEY, lat, lon, Variables.units, Variables.languageCode)
                 .enqueue {
                     onResponse = { response ->
 
@@ -77,14 +78,136 @@ class WeatherRepository @Inject constructor(
     }
 
 
-    suspend fun addWeather(place: PlacesPrediction) {
+    suspend fun addCurrentWeather(place: PlacesPrediction) {
         withContext(Dispatchers.IO) {
-            service.getCurrentWeather(RetrofitClientInstance.API_KEY, place.latitude, place.longitude, "metric", "en")
+            service.getCurrentWeather(RetrofitClientInstance.API_KEY, place.latitude, place.longitude, Variables.units, Variables.languageCode)
                 .enqueue{
                     onResponse = { response ->
 
                         GlobalScope.launch {
                             database.currentWeatherDao().insert(response.body()!!.apply { placeId = place.placeId })
+                        }
+                    }
+                }
+        }
+    }
+
+    suspend fun deleteCurrent(place: PlacesPrediction) {
+        withContext(Dispatchers.IO) {
+            for (weather in database.currentWeatherDao().getCurrentWeatherAsList()) {
+                if (weather.placeId == place.placeId)
+                    database.currentWeatherDao().delete(weather)
+            }
+        }
+    }
+
+    fun deleteCurrent(weather: CurrentWeather) = GlobalScope.launch {
+        database.currentWeatherDao().delete(weather)
+    }
+
+    fun insertCurrent(weather: CurrentWeather) = GlobalScope.launch {
+        database.currentWeatherDao().insert(weather)
+    }
+
+    fun getCurrentWeather(searchQuery: String) = database.currentWeatherDao().getCurrentWeather(searchQuery)
+
+
+    // Methods belonging to OneCall API
+
+    suspend fun refreshWeather() {
+        withContext(Dispatchers.IO) {
+            val dao = database.weatherDao()
+            dao.getWeatherAsList().toList().forEach { weather ->
+                service.getWeather(RetrofitClientInstance.API_KEY, weather.latitude, weather.longitude,Variables.exclude,Variables.units, Variables.languageCode)
+                        .enqueue{
+                            onResponse = { response ->
+                                GlobalScope.launch {
+                                    dao.update(response.body()!!.copy(
+                                        id = weather.id,
+                                        isLocationEntry = weather.isLocationEntry,
+                                        placeId = weather.placeId,
+                                        cityName = weather.cityName,
+                                        cityId = weather.cityId
+                                    ))
+                                }
+                            }
+                        }
+            }
+        }
+    }
+
+
+    // This method is used only to add new weather entry; for refreshing entries see refreshWeather().
+    // Openweather APIs do not allow getting location name when using OneCall API,
+    // so to get full weather info by user's location we need two API calls:
+    // first - to current weather, second - to OneCall
+    suspend fun getWeatherByLocation(lat: Double, lon: Double) {
+        withContext(Dispatchers.IO) {
+            // First call current weather info to get name
+            service.getCurrentWeather(RetrofitClientInstance.API_KEY, lat, lon, Variables.units, Variables.languageCode)
+                .enqueue {
+                    onResponse = { response ->
+
+                        GlobalScope.launch {
+
+                            val currentWeather = response.body()!!
+
+                            // Determine if any location entry is already present in the list
+                            var isNewLocationEntry = true
+                            for (weather in database.weatherDao().getWeatherAsList()) {
+                                if (weather.isLocationEntry) {
+                                    // Determine if they are the same location
+                                    val same = weather.cityId == currentWeather.cityId
+                                    if (!same) {
+                                        // If user changed their location, delete the old entry
+                                        database.weatherDao().delete(weather)
+                                    }
+                                    isNewLocationEntry = !same
+                                    break
+                                }
+                            }
+
+
+
+                            // If user changed their location, add a new entry
+                            if (isNewLocationEntry) {
+                                // Then use OneCall to get full info
+                                service.getWeather(RetrofitClientInstance.API_KEY, lat, lon, Variables.exclude, Variables.units, Variables.languageCode)
+                                    .enqueue {
+                                        onResponse = { oneCallResponse ->
+                                            GlobalScope.launch {
+                                                database.weatherDao().insert(
+                                                    oneCallResponse.body()!!.apply { // Copy name and ID from current weather
+                                                        isLocationEntry = true
+                                                        cityName = currentWeather.cityName
+                                                        cityId = currentWeather.cityId
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
+    // This method is used to add new entries from Search screen
+    suspend fun addWeather(place: PlacesPrediction) {
+        withContext(Dispatchers.IO) {
+            service.getWeather(RetrofitClientInstance.API_KEY, place.latitude, place.longitude, Variables.exclude, Variables.units, Variables.languageCode)
+                .enqueue{
+                    onResponse = { response ->
+
+                        GlobalScope.launch {
+                            val w = response.body()!!.apply {
+                                placeId = place.placeId
+                                cityName = place.fullText.split(", ")[0]
+                            }
+                            Log.v("Add weather", w.toString())
+                            database.weatherDao().insert(w)
                         }
                     }
                 }
@@ -100,37 +223,17 @@ class WeatherRepository @Inject constructor(
         }
     }
 
-    fun delete(weather: CurrentWeather) = GlobalScope.launch {
-        database.currentWeatherDao().delete(weather)
+    fun delete(weather: Weather) = GlobalScope.launch {
+        database.weatherDao().delete(weather)
     }
 
-    fun insert(weather: CurrentWeather) = GlobalScope.launch {
-        database.currentWeatherDao().insert(weather)
+    fun insert(weather: Weather) = GlobalScope.launch {
+        database.weatherDao().insert(weather)
     }
-
-    fun getCurrentWeather(searchQuery: String) = database.currentWeatherDao().getCurrentWeather(searchQuery)
-
-
-    // Methods belonging to OneCall API
-
-    suspend fun refreshWeather() {
-        withContext(Dispatchers.IO) {
-            val dao = database.weatherDao()
-            dao.getWeatherAsList().toList().forEach { weather ->
-                service.getWeather(RetrofitClientInstance.API_KEY, weather.latitude, weather.longitude,"minutely","metric", "en")
-                        .enqueue{
-                            onResponse = { response ->
-                                GlobalScope.launch {
-                                    dao.update(response.body()!!.copy(id = weather.id))
-                                }
-                            }
-                        }
-            }
-        }
-    }
-
 
 
     fun getWeather() = database.weatherDao().getWeather()
+
+    fun getWeather(searchQuery: String) = database.weatherDao().getWeather(searchQuery)
 
 }

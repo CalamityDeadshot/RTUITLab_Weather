@@ -6,6 +6,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WeatherDao {
+
+    @Query("SELECT * FROM weather WHERE cityName LIKE '%' || :searchQuery || '%' ORDER BY isLocationEntry DESC, id DESC")
+    fun getWeather(searchQuery: String): Flow<List<Weather>>
+
     @Query("SELECT * FROM weather")
     fun getWeather(): Flow<List<Weather>>
 

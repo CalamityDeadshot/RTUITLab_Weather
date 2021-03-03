@@ -7,4 +7,10 @@ object Variables {
     var isNetworkConnected: Boolean by Delegates.observable(false) { property, oldValue, newValue ->
         Log.i("Network connectivity", "$newValue")
     }
+
+    var languageCode: String = "en"
+
+    var units: String = "metric"
+
+    var exclude: String = "minutely"
 }

@@ -23,7 +23,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:barrierMargin="8dp"
-                    tools:listitem="@layout/item_current_weather" />
+                    tools:listitem="@layout/item_weather" />
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 

@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.calamity.weather.R
-import com.calamity.weather.data.api.openweather.CurrentWeather
+import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.databinding.FragmentWeatherBinding
 import com.calamity.weather.ui.MainActivity
 import com.calamity.weather.ui.adapters.WeatherAdapter
@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class WeatherFragment : Fragment(R.layout.fragment_weather) {
-    private val weatherViewModel: CurrentWeatherViewModel by viewModels()
+    private val weatherViewModel: WeatherViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -46,7 +46,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             weatherViewModel.event.collect { event ->
                 when (event) {
-                    is CurrentWeatherViewModel.WeatherEvent.ShowUndoDeleteMessage -> {
+                    is WeatherViewModel.WeatherEvent.ShowUndoDeleteMessage -> {
                         Snackbar.make(requireView(), "Deleted", Snackbar.LENGTH_LONG)
                             .setAction("Undo") {
                                 weatherViewModel.onUndoDelete(event.weather)
@@ -143,7 +143,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     //      1. There is no Internet connection
     //      2. There is Internet connection, but user denied location access so there is no way to populate the list
     // Otherwise, the list will not be empty because an entry with weather by location will be created.
-    private fun handleEmptyList(list: List<CurrentWeather>) {
+    private fun handleEmptyList(list: List<Weather>) {
         if (list.isEmpty()) {
             when (switcher.currentView.id) {
                 // Case empty list is visible

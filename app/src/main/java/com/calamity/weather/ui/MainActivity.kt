@@ -1,18 +1,12 @@
 package com.calamity.weather.ui
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.calamity.weather.R
-import com.calamity.weather.ui.detailedweather.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 

@@ -8,29 +8,30 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.calamity.weather.R
-import com.calamity.weather.data.api.openweather.CurrentWeather
-import com.calamity.weather.databinding.ItemCurrentWeatherBinding
+import com.calamity.weather.data.api.openweather.Weather
+import com.calamity.weather.databinding.ItemWeatherBinding
 import com.github.florent37.expansionpanel.viewgroup.ExpansionLayoutCollection
+import kotlin.math.roundToInt
 
 
-class WeatherAdapter : ListAdapter<CurrentWeather, WeatherAdapter.WeatherViewHolder>(DiffCallback()) {
+class WeatherAdapter : ListAdapter<Weather, WeatherAdapter.WeatherViewHolder>(DiffCallback()) {
 
     private val expansionsCollection = ExpansionLayoutCollection().apply { openOnlyOne(true) }
 
-    inner class WeatherViewHolder(private val binding: ItemCurrentWeatherBinding) : RecyclerView.ViewHolder(
+    inner class WeatherViewHolder(private val binding: ItemWeatherBinding) : RecyclerView.ViewHolder(
         binding.root
     ) {
 
 
-        fun bind(weather: CurrentWeather) {
+        fun bind(weather: Weather) {
             binding.apply {
                 locationName.text = weather.cityName
                 locationName.setCompoundDrawablesRelativeWithIntrinsicBounds(
                     if (weather.isLocationEntry) R.drawable.ic_location_24dp else 0,
                     0, 0, 0
                 )
-                conditions.text = weather.weatherConditions[0].main
-                temperature.text = "${Math.round(weather.main.temp!!)}°"
+                conditions.text = weather.weather.weatherConditions[0].main
+                temperature.text = "${weather.weather.temperature.roundToInt()}°"
                 expansionsCollection.add(expansionLayout)
                 today.append(" · ")
             }
@@ -38,7 +39,7 @@ class WeatherAdapter : ListAdapter<CurrentWeather, WeatherAdapter.WeatherViewHol
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WeatherViewHolder {
-        val binding = ItemCurrentWeatherBinding.inflate(
+        val binding = ItemWeatherBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -51,11 +52,11 @@ class WeatherAdapter : ListAdapter<CurrentWeather, WeatherAdapter.WeatherViewHol
         holder.bind(current)
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<CurrentWeather>() {
-        override fun areItemsTheSame(oldItem: CurrentWeather, newItem: CurrentWeather): Boolean =
-            oldItem.db_id == newItem.db_id
+    class DiffCallback : DiffUtil.ItemCallback<Weather>() {
+        override fun areItemsTheSame(oldItem: Weather, newItem: Weather): Boolean =
+            oldItem.id == newItem.id
 
-        override fun areContentsTheSame(oldItem: CurrentWeather, newItem: CurrentWeather): Boolean =
+        override fun areContentsTheSame(oldItem: Weather, newItem: Weather): Boolean =
             oldItem == newItem
 
     }

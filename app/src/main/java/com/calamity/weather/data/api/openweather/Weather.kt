@@ -12,5 +12,14 @@ data class Weather(
     @SerializedName("timezone") var timezone: String,
     @SerializedName("timezone_offset") var timezoneOffset: Int,
     @SerializedName("current") var weather: CurrentWeather,
+    var isLocationEntry: Boolean,
+    // Obtained from Places API, used to display location name to provide
+    // consistency because Places name and openweather name differ
+    var cityName: String = "",
+    var cityId: Int = 0,
+
+    // Places API place ID
+    var placeId: String? = null
 ) {
+
 }
