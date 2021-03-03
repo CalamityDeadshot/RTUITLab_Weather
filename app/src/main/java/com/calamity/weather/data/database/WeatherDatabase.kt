@@ -35,59 +35,6 @@ abstract class WeatherDatabase : RoomDatabase() {
         // First db initialization
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
-
-            val dao = database.get().currentWeatherDao()
-
-            val service = RetrofitClientInstance.getRetrofitInstance()!!.create(WeatherService::class.java)
-            service.getCurrentWeather(RetrofitClientInstance.API_KEY, "Moscow,129,ru", "metric", "en")
-                .enqueue(object : retrofit2.Callback<ApiResponseWrapper> {
-                    override fun onResponse(
-                        call: Call<ApiResponseWrapper>,
-                        response: Response<ApiResponseWrapper>
-                    ) {
-                        applicationScope.launch {
-                            dao.insert(response.body()!!.responseList[0])
-                        }
-                    }
-
-                    override fun onFailure(call: Call<ApiResponseWrapper>, t: Throwable) {
-                        Log.v("retrofit", "call failed: ${t.message}")
-                    }
-                })
-
-            service.getCurrentWeather(RetrofitClientInstance.API_KEY, "Omsk,644,ru", "metric", "en")
-                .enqueue(object : retrofit2.Callback<ApiResponseWrapper> {
-                    override fun onResponse(
-                        call: Call<ApiResponseWrapper>,
-                        response: Response<ApiResponseWrapper>
-                    ) {
-                        applicationScope.launch {
-                            dao.insert(response.body()!!.responseList[0])
-                        }
-                    }
-
-                    override fun onFailure(call: Call<ApiResponseWrapper>, t: Throwable) {
-                        Log.v("retrofit", "call failed: ${t.message}")
-                    }
-                })
-
-            service.getCurrentWeather(RetrofitClientInstance.API_KEY, "Arkhangelsk,163,ru", "metric", "en")
-                .enqueue(object : retrofit2.Callback<ApiResponseWrapper> {
-                    override fun onResponse(
-                        call: Call<ApiResponseWrapper>,
-                        response: Response<ApiResponseWrapper>
-                    ) {
-                        applicationScope.launch {
-                            dao.insert(response.body()!!.responseList[0])
-                        }
-                    }
-
-                    override fun onFailure(call: Call<ApiResponseWrapper>, t: Throwable) {
-                        Log.v("retrofit", "call failed: ${t.message}")
-                    }
-                })
-
-
         }
     }
 }
