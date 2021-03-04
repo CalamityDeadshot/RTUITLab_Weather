@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
         setupActionBarWithNavController(navController)
 
         this.lifecycleScope.launchWhenStarted {
-            viewModel.event.collect {
+            viewModel.event?.collect {
                 Snackbar.make(nav_host_fragment_container,
                     if (it)
                         resources.getString(R.string.connection_established)

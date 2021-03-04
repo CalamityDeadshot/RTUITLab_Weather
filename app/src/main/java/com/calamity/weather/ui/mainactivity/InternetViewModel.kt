@@ -10,18 +10,24 @@ import javax.inject.Inject
 
 @HiltViewModel
 class InternetViewModel @Inject constructor() : ViewModel() {
-    private val internetAccess: LiveData<Boolean> = Variables.isNetworkConnectedLive
+
+    private val observer = Observer<Boolean> {
+        onInternetAccessChanged()
+    }
 
     init {
-        this.internetAccess.observeForever {
-            onInternetAccessChanged()
-        }
+        Variables.isNetworkConnectedLive.observeForever(observer)
     }
 
     private fun onInternetAccessChanged() = viewModelScope.launch {
-        eventChannel.send(internetAccess.value!!)
+        eventChannel?.send(Variables.isNetworkConnected)
     }
 
-    private val eventChannel = Channel<Boolean>()
-    val event = eventChannel.receiveAsFlow()
+    private val eventChannel: Channel<Boolean>? = Channel<Boolean>()
+    val event = eventChannel?.receiveAsFlow()
+
+    override fun onCleared() {
+        Variables.isNetworkConnectedLive.removeObserver(observer)
+        super.onCleared()
+    }
 }
