@@ -1,8 +1,6 @@
 package com.calamity.weather.ui.weather
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.data.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +24,16 @@ class WeatherViewModel @Inject constructor (
 
     val weather = weatherFlow.asLiveData()
 
-    suspend fun update() = repository.refreshWeather()
+    init {
+        weather.observeForever {
+            busy.value = false
+        }
+    }
+    var busy = MutableLiveData<Boolean>(false)
+    suspend fun update() {
+        busy.value = true
+        repository.refreshWeather()
+    }
 
     suspend fun addGpsWeather(lat: Double, lon: Double) = repository.getWeatherByLocation(lat, lon)
 

@@ -1,8 +1,6 @@
 package com.calamity.weather.ui.locationsearch
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.calamity.weather.data.api.places.PlacesPrediction
 import com.calamity.weather.data.repository.AutocompleteRepository
 import com.calamity.weather.data.repository.WeatherRepository
@@ -26,12 +24,27 @@ class SearchViewModel @Inject constructor(
     }
 
     val searchQuery = MutableStateFlow("")
+    var busy = MutableLiveData<Boolean>(false)
+    var hasQuery = MutableLiveData<Boolean>(false)
 
     private val autocompleteFlow = searchQuery.flatMapLatest {
+        busy.value = true
+        hasQuery.value = it.isNotEmpty()
         repository.getPredictions(it)
     }
 
     val predictions = autocompleteFlow.asLiveData()
+
+    private val observer = Observer<List<PlacesPrediction>> {
+        viewModelScope.launch {
+            val size = repository.getCount()
+            busy.value = size == 0
+        }
+    }
+
+    init {
+        predictions.observeForever(observer)
+    }
 
     suspend fun onAddPlace(place: PlacesPrediction, added: Boolean) {
         viewModelScope.launch {
@@ -44,6 +57,10 @@ class SearchViewModel @Inject constructor(
 
     fun onDestroy() = viewModelScope.launch {repository.clearDb()}
 
+    fun forceMessage() = viewModelScope.launch {
+        sendEvent(searchQuery.value)
+    }
+
     private suspend fun sendEvent(query: String) {
         eventChannel.send(UpdateEvent.UpdateList(repository.getPredictionsAsList(query)))
     }
@@ -53,5 +70,10 @@ class SearchViewModel @Inject constructor(
 
     sealed class UpdateEvent {
         data class UpdateList(val list: List<PlacesPrediction>) : UpdateEvent()
+    }
+
+    override fun onCleared() {
+        predictions.removeObserver(observer)
+        super.onCleared()
     }
 }

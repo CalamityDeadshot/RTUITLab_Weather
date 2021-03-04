@@ -3,7 +3,6 @@ package com.calamity.weather.ui.weather
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -31,13 +30,14 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_weather.*
+import kotlinx.android.synthetic.main.layout_list_empty.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
 class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnItemClickListener {
-    private val weatherViewModel: WeatherViewModel by viewModels()
+    private val viewModel: WeatherViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -48,12 +48,12 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         requestGpsPermission()
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            weatherViewModel.event.collect { event ->
+            viewModel.event.collect { event ->
                 when (event) {
                     is WeatherViewModel.WeatherEvent.ShowUndoDeleteMessage -> {
                         Snackbar.make(requireView(), "Deleted", Snackbar.LENGTH_LONG)
                             .setAction("Undo") {
-                                weatherViewModel.onUndoDelete(event.weather)
+                                viewModel.onUndoDelete(event.weather)
                             }.show()
                     }
                 }
@@ -63,7 +63,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         setHasOptionsMenu(true)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            weatherViewModel.update()
+            viewModel.update()
             getWeatherByLocation()
         }
     }
@@ -101,7 +101,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     val weather = weatherAdapter.currentList[viewHolder.adapterPosition]
-                    weatherViewModel.onEntrySwiped(weather)
+                    viewModel.onEntrySwiped(weather)
                 }
 
                 override fun getMovementFlags(
@@ -118,24 +118,38 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
             }).attachToRecyclerView(currentWeatherRecycler)
         }
 
-        weatherViewModel.weather.observe(viewLifecycleOwner) {
+        viewModel.weather.observe(viewLifecycleOwner) {
             weatherAdapter.submitList(it)
             handleEmptyList(it)
         }
+
+        viewModel.busy.observe(viewLifecycleOwner) {
+            recycler_swipe_layout.isRefreshing = it
+        }
+
+        Variables.isNetworkConnectedLive.observe(viewLifecycleOwner) {
+            if (it)
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.update()
+            }
+        }
+
+        img_search.visibility = View.GONE
+        loading.visibility = View.GONE
+
     }
 
     private fun initListeners() {
         recycler_swipe_layout.setOnRefreshListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                weatherViewModel.update()
+                viewModel.update()
                 getWeatherByLocation()
-                recycler_swipe_layout.isRefreshing = false
             }
         }
 
         btn_retry.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                weatherViewModel.update()
+                viewModel.update()
                 handleEmptyList((current_weather_recycler.adapter as WeatherAdapter).currentList)
             }
         }
@@ -157,16 +171,16 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                 R.id.recycler_swipe_layout -> {
                     if (isInternetAvailable()) {
                         if (!gpsPermissionGranted()) {
-                            empty_img_no_connection.visibility = View.GONE
-                            empty_img_no_gps.visibility = View.VISIBLE
+                            img_no_connection.visibility = View.GONE
+                            img_no_gps.visibility = View.VISIBLE
                             btn_retry.visibility = View.GONE
                             text_empty.text = resources.getString(R.string.no_gps)
                         } else {
                             getWeatherByLocation()
                         }
                     } else {
-                        empty_img_no_connection.visibility = View.VISIBLE
-                        empty_img_no_gps.visibility = View.GONE
+                        img_no_connection.visibility = View.VISIBLE
+                        img_no_gps.visibility = View.GONE
                         btn_retry.visibility = View.VISIBLE
                         text_empty.text = resources.getString(R.string.no_internet)
                     }
@@ -176,8 +190,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                 else -> {
                     if (isInternetAvailable()) {
                         if (!gpsPermissionGranted()) {
-                            empty_img_no_connection.visibility = View.GONE
-                            empty_img_no_gps.visibility = View.VISIBLE
+                            img_no_connection.visibility = View.GONE
+                            img_no_gps.visibility = View.VISIBLE
                             btn_retry.visibility = View.GONE
                             text_empty.text = resources.getString(R.string.no_gps)
                         } else {
@@ -240,7 +254,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                 return@addOnSuccessListener
             }
             viewLifecycleOwner.lifecycleScope.launch {
-                weatherViewModel.addGpsWeather(it.latitude, it.longitude)
+                viewModel.addGpsWeather(it.latitude, it.longitude)
             }
         }.addOnFailureListener {
             it.printStackTrace()
@@ -267,7 +281,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         val searchView = searchItem.actionView as SearchView
 
         searchView.onQueryTextChanged {
-            weatherViewModel.searchQuery.value = it
+            viewModel.searchQuery.value = it
         }
     }
 

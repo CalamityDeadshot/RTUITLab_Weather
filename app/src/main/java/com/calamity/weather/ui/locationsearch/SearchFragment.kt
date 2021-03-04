@@ -14,11 +14,13 @@ import com.calamity.weather.data.api.places.PlacesPrediction
 import com.calamity.weather.databinding.FragmentSearchBinding
 import com.calamity.weather.ui.adapters.CitiesAdapter
 import com.calamity.weather.utils.PlacesApi
+import com.calamity.weather.utils.Variables
 import com.calamity.weather.utils.onQueryTextChanged
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.*
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_weather.*
+import kotlinx.android.synthetic.main.fragment_weather.switcher
+import kotlinx.android.synthetic.main.layout_list_empty.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -76,16 +78,50 @@ class SearchFragment : Fragment(R.layout.fragment_search), CitiesAdapter.OnItemC
                 when (event) {
                     is SearchViewModel.UpdateEvent.UpdateList -> {
                         citiesAdapter.submitList(event.list)
+                        handleEmptyList(event.list)
                     }
                 }
             }
         }
+
+        if (!Variables.isNetworkConnected) showNoInternetMessage()
+        Variables.isNetworkConnectedLive.observe(viewLifecycleOwner) {
+            if (it) {
+                if (viewModel.hasQuery.value!!) {
+                    switchTo(R.id.cities_recycler)
+                    viewModel.searchQuery.value = viewModel.searchQuery.value
+                }
+                else
+                    showStartEmptyMessage()
+            }
+            else {
+                switchTo(R.id.empty)
+                showNoInternetMessage()
+            }
+        }
+
+        viewModel.busy.observe(viewLifecycleOwner) {
+            if (!Variables.isNetworkConnected) return@observe
+            if (it) {
+                if (viewModel.hasQuery.value!!) showLoadingEmptyMessage()
+            } else {
+                if (!viewModel.hasQuery.value!!) {
+                    showStartEmptyMessage()
+                } else {
+                    showNoResultsEmptyMessage()
+                }
+            }
+        }
+
+        img_no_gps.visibility = View.GONE
+
     }
 
     private fun handleEmptyList(list: List<PlacesPrediction>) {
         if (list.isEmpty()) {
-            if (switcher.currentView.id == R.id.cities_recycler)
+            if (switcher.currentView.id == R.id.cities_recycler) {
                 switcher.showNext()
+            }
 
         } else if (switcher.currentView.id == R.id.empty)
             switcher.showNext()
@@ -111,6 +147,45 @@ class SearchFragment : Fragment(R.layout.fragment_search), CitiesAdapter.OnItemC
     override fun onDestroy() {
         viewModel.onDestroy()
         super.onDestroy()
+    }
+
+    private fun switchTo(id: Int) {
+        if (switcher.currentView.id == id) return
+        else switcher.showNext()
+    }
+
+    private fun clearEmptyMessage() {
+        img_search.visibility = View.GONE
+        loading.visibility = View.GONE
+        img_no_connection.visibility = View.GONE
+        img_sad.visibility = View.GONE
+        btn_retry.visibility = View.GONE
+    }
+
+    private fun showNoInternetMessage() {
+        clearEmptyMessage()
+        img_no_connection.visibility = View.VISIBLE
+        btn_retry.visibility = View.VISIBLE
+        text_empty.text = resources.getString(R.string.no_internet)
+    }
+
+    private fun showLoadingEmptyMessage() {
+        clearEmptyMessage()
+        text_empty.text = getString(R.string.loading)
+        loading.visibility = View.VISIBLE
+    }
+
+    private fun showNoResultsEmptyMessage() {
+        clearEmptyMessage()
+        img_sad.visibility = View.VISIBLE
+        img_search.visibility = View.VISIBLE
+        text_empty.text = getString(R.string.search_nothing_found)
+    }
+
+    private fun showStartEmptyMessage() {
+        clearEmptyMessage()
+        img_search.visibility = View.VISIBLE
+        text_empty.text = getString(R.string.search_empty_text)
     }
 
 }

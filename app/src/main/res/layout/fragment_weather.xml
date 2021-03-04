@@ -27,68 +27,8 @@
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 
-            <RelativeLayout
-                android:id="@+id/empty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center">
-
-                <RelativeLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true">
-
-                    <LinearLayout
-                        android:id="@+id/imgs"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true">
-
-                        <ImageView
-                            android:id="@+id/empty_img_no_connection"
-                            android:layout_width="72dp"
-                            android:layout_height="72dp"
-                            android:src="@drawable/ic_no_connection_24dp" />
-
-                        <ImageView
-                            android:id="@+id/empty_img_no_gps"
-                            android:layout_width="72dp"
-                            android:layout_height="72dp"
-                            android:src="@drawable/ic_location_off_24dp" />
-
-                        <ImageView
-                            android:layout_width="72dp"
-                            android:layout_height="72dp"
-                            android:src="@drawable/ic_sad_24dp" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/text_empty"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/imgs"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginBottom="16dp"
-                        android:text="@string/no_internet"
-                        android:textAlignment="center"
-                        android:textSize="18sp" />
-
-                    <Button
-                        android:id="@+id/btn_retry"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/retry"
-                        android:layout_below="@+id/text_empty"
-                        android:layout_centerHorizontal="true"
-                        android:background="@drawable/background_transparent_button"
-                        android:textAllCaps="false"
-                        android:textColor="@android:color/tab_indicator_text"/>
-
-                </RelativeLayout>
-
-            </RelativeLayout>
+            <include android:id="@+id/empty"
+                layout="@layout/layout_list_empty"/>
 
 
         </ViewSwitcher>

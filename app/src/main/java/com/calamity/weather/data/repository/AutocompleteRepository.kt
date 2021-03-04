@@ -33,7 +33,7 @@ class AutocompleteRepository @Inject constructor(
                 .build()
 
 
-            client!!.findAutocompletePredictions(request).addOnSuccessListener { response ->
+            client?.findAutocompletePredictions(request)?.addOnSuccessListener { response ->
                 for (prediction in response.autocompletePredictions) {
                     GlobalScope.launch {
                         val present = database.dao().getPredictionsAsList()
@@ -97,6 +97,8 @@ class AutocompleteRepository @Inject constructor(
             database.dao().nuke()
         }
     }
+
+    suspend fun getCount() = database.dao().getDataCount()
 
     suspend fun getPredictionsAsList(query: String) = database.dao().getPredictionsAsList(query)
 }

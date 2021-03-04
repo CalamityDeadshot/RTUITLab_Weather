@@ -20,5 +20,7 @@
     <string name="saturday">Sat</string>
     <string name="sunday">Sun</string>
     <string name="open_on_map">Open on map</string>
+    <string name="search_nothing_found">Nothing found for your query</string>
+    <string name="loading">Loading...</string>
 
 </resources>
