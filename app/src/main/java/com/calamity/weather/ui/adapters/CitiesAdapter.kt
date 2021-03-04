@@ -60,7 +60,7 @@ class CitiesAdapter(private val listener: OnItemClickListener) : ListAdapter<Pla
         override fun areItemsTheSame(
             oldItem: PlacesPrediction,
             newItem: PlacesPrediction
-        ): Boolean = oldItem.id == newItem.id
+        ): Boolean = oldItem.placeId == newItem.placeId//oldItem.id == newItem.id
         override fun areContentsTheSame(
             oldItem: PlacesPrediction,
             newItem: PlacesPrediction

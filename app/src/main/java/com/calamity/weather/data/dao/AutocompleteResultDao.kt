@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AutocompleteResultDao {
 
-    @Query("SELECT * FROM autocomplete_table WHERE (fullText LIKE '%' || :searchQuery || '%') AND (:searchQuery != '') ORDER BY id ASC")
+    @Query("SELECT * FROM autocomplete_table WHERE (fullText LIKE '%' || :searchQuery || '%') AND (:searchQuery != '') ")
     fun getPredictions(searchQuery: String) : Flow<List<PlacesPrediction>>
     @Query("SELECT * FROM autocomplete_table")
     suspend fun getPredictionsAsList() : List<PlacesPrediction>
-    @Query("SELECT * FROM autocomplete_table WHERE (fullText LIKE '%' || :searchQuery || '%') AND (:searchQuery != '') ORDER BY id ASC")
+    @Query("SELECT * FROM autocomplete_table WHERE (fullText LIKE '%' || :searchQuery || '%') AND (:searchQuery != '') ")
     suspend fun getPredictionsAsList(searchQuery: String) : List<PlacesPrediction>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
