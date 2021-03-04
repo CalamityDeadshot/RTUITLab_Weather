@@ -40,7 +40,7 @@
             android:layout_alignTop="@id/location_name"
             android:layout_alignBottom="@id/full_name"
             android:layout_alignParentEnd="true"
-            android:background="@drawable/background_retry_button"
+            android:background="@drawable/background_transparent_button"
             android:textColor="@color/white"
             android:textSize="36sp"
             android:src="@drawable/ic_add" />

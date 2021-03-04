@@ -17,16 +17,17 @@ import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.data.api.openweather.subclasses.onecall.DailyWeather
 import com.calamity.weather.databinding.ItemWeatherBinding
 import com.github.florent37.expansionpanel.viewgroup.ExpansionLayoutCollection
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
 
-class WeatherAdapter(private val context: Context, private val imageMap: HashMap<String, Int>) : ListAdapter<Weather, WeatherAdapter.WeatherViewHolder>(
-    DiffCallback()
-) {
+class WeatherAdapter(
+    private val context: Context,
+    private val imageMap: HashMap<String, Int>,
+    private val listener: OnItemClickListener
+    ) : ListAdapter<Weather, WeatherAdapter.WeatherViewHolder>(DiffCallback()) {
 
     private val expansionsCollection = ExpansionLayoutCollection().apply { openOnlyOne(true) }
 
@@ -35,6 +36,14 @@ class WeatherAdapter(private val context: Context, private val imageMap: HashMap
     ) {
 
         var viewExpanded = false
+
+        init {
+            binding.apply {
+                openMapBtn.setOnClickListener {
+                    listener.onClick(it, getItem(adapterPosition))
+                }
+            }
+        }
 
         @SuppressLint("SetTextI18n")
         fun bind(weather: Weather) {
@@ -86,6 +95,8 @@ class WeatherAdapter(private val context: Context, private val imageMap: HashMap
                     viewExpanded = expanded
                 }
 
+
+
                 // Binding temperature color
                 /*val minColor = context.getColor(R.color.min_temperature)
                 val maxColor = context.getColor(R.color.max_temperature)
@@ -125,6 +136,10 @@ class WeatherAdapter(private val context: Context, private val imageMap: HashMap
         override fun areContentsTheSame(oldItem: Weather, newItem: Weather): Boolean =
             oldItem == newItem
 
+    }
+
+    interface OnItemClickListener {
+        fun onClick(view: View, weather: Weather)
     }
 
 

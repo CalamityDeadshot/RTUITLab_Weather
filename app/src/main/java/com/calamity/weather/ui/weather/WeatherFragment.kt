@@ -2,7 +2,11 @@ package com.calamity.weather.ui.weather
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
@@ -18,8 +22,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.calamity.weather.R
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.databinding.FragmentWeatherBinding
-import com.calamity.weather.ui.mainactivity.MainActivity
 import com.calamity.weather.ui.adapters.WeatherAdapter
+import com.calamity.weather.ui.mainactivity.MainActivity
 import com.calamity.weather.utils.Variables
 import com.calamity.weather.utils.onQueryTextChanged
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -32,7 +36,7 @@ import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
-class WeatherFragment : Fragment(R.layout.fragment_weather) {
+class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnItemClickListener {
     private val weatherViewModel: WeatherViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,7 +72,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         val binding = FragmentWeatherBinding.bind(view)
 
 
-        val weatherAdapter = WeatherAdapter(requireContext(), getImageMap())
+        val weatherAdapter = WeatherAdapter(requireContext(), getImageMap(), this)
 
         binding.apply {
             currentWeatherRecycler.apply {
@@ -105,7 +109,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                     viewHolder: RecyclerView.ViewHolder
                 ): Int {
                     if (weatherAdapter.currentList[viewHolder.adapterPosition].isLocationEntry ||
-                        (viewHolder as WeatherAdapter.WeatherViewHolder).viewExpanded) {
+                        (viewHolder as WeatherAdapter.WeatherViewHolder).viewExpanded
+                    ) {
                         return 0
                     }
                     return makeMovementFlags(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT)
@@ -227,7 +232,11 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
         fusedLocationClient.lastLocation.addOnSuccessListener {
             if (it == null) {
-                Toast.makeText(requireContext(), "Error getting location. Add cities manually", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Error getting location. Add cities manually",
+                    Toast.LENGTH_LONG
+                ).show()
                 return@addOnSuccessListener
             }
             viewLifecycleOwner.lifecycleScope.launch {
@@ -293,4 +302,34 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         map["50n"] = R.drawable.ic_50n
         return map
     }
+
+    override fun onClick(view: View, weather: Weather) {
+        when (view.id) {
+            R.id.open_map_btn -> {
+                val alertDialog: AlertDialog = activity.let {
+                    val builder = AlertDialog.Builder(it)
+                    builder.apply {
+                        setPositiveButton("Google") { dialog, id ->
+                            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(constructGoogleMapsUri(weather.latitude, weather.longitude, 10)))
+                            startActivity(browserIntent)
+                        }
+                        setNegativeButton("Yandex") { dialog, id ->
+                            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(constructYandexMapsUri(weather.longitude, weather.latitude, 10)))
+                            startActivity(browserIntent)
+                        }
+                        setNeutralButton("Cancel") { dialog, id ->
+
+                        }
+                    }
+                    builder.setMessage("Which maps do you want to use?")
+                        .setTitle("Choose maps")
+                    builder.create()
+                }
+                alertDialog.show()
+            }
+        }
+    }
+
+    private fun constructGoogleMapsUri(lat: Double, lon: Double, zoom: Int): String = "${Variables.googleMapsUrl}&center=$lat,$lon&zoom=$zoom"
+    private fun constructYandexMapsUri(lat: Double, lon: Double, zoom: Int): String = "${Variables.yandexMapsUrl}ll=$lat,$lon&z=$zoom&l=map"
 }

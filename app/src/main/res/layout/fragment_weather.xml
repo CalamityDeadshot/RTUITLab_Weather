@@ -82,7 +82,7 @@
                         android:text="@string/retry"
                         android:layout_below="@+id/text_empty"
                         android:layout_centerHorizontal="true"
-                        android:background="@drawable/background_retry_button"
+                        android:background="@drawable/background_transparent_button"
                         android:textAllCaps="false"
                         android:textColor="@android:color/tab_indicator_text"/>
 

@@ -18,4 +18,7 @@ object Variables {
     var units: String = "metric"
 
     var exclude: String = "minutely"
+
+    const val googleMapsUrl = "https://www.google.com/maps/@?api=1&map_action=map"
+    const val yandexMapsUrl = "yandexmaps://maps.yandex.com/?"
 }

@@ -178,6 +178,17 @@
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/item_daily"/>
 
+                <Button
+                    android:id="@+id/open_map_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/daily_weather_recycler"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/background_transparent_button"
+                    android:text="@string/open_on_map"
+                    android:textColor="@color/white"
+                    android:textAllCaps="false"/>
+
             </RelativeLayout>
 
         </com.github.florent37.expansionpanel.ExpansionLayout>
