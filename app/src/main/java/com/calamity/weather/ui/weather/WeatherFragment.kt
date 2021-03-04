@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnItemClickListener {
     private val viewModel: WeatherViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var searchView: SearchView
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -278,7 +279,13 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         inflater.inflate(R.menu.menu_fragment_weather, menu)
 
         val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
+        searchView = searchItem.actionView as SearchView
+
+        val pendingQuery = viewModel.searchQuery.value
+        if (pendingQuery.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView.setQuery(pendingQuery, false)
+        }
 
         searchView.onQueryTextChanged {
             viewModel.searchQuery.value = it
@@ -346,4 +353,9 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
 
     private fun constructGoogleMapsUri(lat: Double, lon: Double, zoom: Int): String = "${Variables.googleMapsUrl}&center=$lat,$lon&zoom=$zoom"
     private fun constructYandexMapsUri(lat: Double, lon: Double, zoom: Int): String = "${Variables.yandexMapsUrl}ll=$lat,$lon&z=$zoom&l=map"
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        searchView.setOnQueryTextListener(null)
+    }
 }
