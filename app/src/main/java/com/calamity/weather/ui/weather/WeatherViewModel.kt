@@ -24,10 +24,12 @@ class WeatherViewModel @Inject constructor (
 
     val weather = weatherFlow.asLiveData()
 
+    private val observer = Observer<List<Weather>> {
+        busy.value = false
+    }
+
     init {
-        weather.observeForever {
-            busy.value = false
-        }
+        weather.observeForever(observer)
     }
     var busy = MutableLiveData<Boolean>(false)
     suspend fun update() {
@@ -51,5 +53,10 @@ class WeatherViewModel @Inject constructor (
 
     sealed class WeatherEvent {
         data class ShowUndoDeleteMessage(val weather: Weather) : WeatherEvent()
+    }
+
+    override fun onCleared() {
+        weather.removeObserver(observer)
+        super.onCleared()
     }
 }
