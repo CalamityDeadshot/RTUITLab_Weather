@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
@@ -12,6 +13,7 @@ import com.calamity.weather.R
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.flow.collect
 
 
 @AndroidEntryPoint
@@ -31,18 +33,20 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
 
         setupActionBarWithNavController(navController)
 
-        viewModel.internetAccess.observe(this) {
-            Snackbar.make(nav_host_fragment_container,
-                if (it)
-                    resources.getString(R.string.connection_established)
-                else resources.getString(R.string.connection_lost),
-                Snackbar.LENGTH_LONG)
-                .setBackgroundTint(resources.getColor(
+        this.lifecycleScope.launchWhenStarted {
+            viewModel.event.collect {
+                Snackbar.make(nav_host_fragment_container,
                     if (it)
-                        android.R.color.holo_green_light
-                    else android.R.color.holo_red_dark
-                ))
-                .show()
+                        resources.getString(R.string.connection_established)
+                    else resources.getString(R.string.connection_lost),
+                    Snackbar.LENGTH_LONG)
+                    .setBackgroundTint(resources.getColor(
+                        if (it)
+                            android.R.color.holo_green_light
+                        else android.R.color.holo_red_dark
+                    ))
+                    .show()
+            }
         }
 
     }
