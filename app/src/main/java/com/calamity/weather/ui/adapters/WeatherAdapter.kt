@@ -42,6 +42,9 @@ class WeatherAdapter(
                 openMapBtn.setOnClickListener {
                     listener.onClick(it, getItem(adapterPosition))
                 }
+                notify.setOnClickListener {
+                    listener.onClick(it, getItem(adapterPosition))
+                }
             }
         }
 

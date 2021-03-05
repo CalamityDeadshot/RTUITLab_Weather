@@ -2,15 +2,22 @@ package com.calamity.weather.ui.weather
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlertDialog
+import android.app.*
+import android.content.Context.ALARM_SERVICE
+import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
+import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -24,6 +31,8 @@ import com.calamity.weather.databinding.FragmentWeatherBinding
 import com.calamity.weather.ui.adapters.WeatherAdapter
 import com.calamity.weather.ui.mainactivity.MainActivity
 import com.calamity.weather.utils.Variables
+import com.calamity.weather.utils.notifications.AlarmReceiver
+import com.calamity.weather.utils.notifications.NotificationHelper
 import com.calamity.weather.utils.onQueryTextChanged
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -33,13 +42,27 @@ import kotlinx.android.synthetic.main.fragment_weather.*
 import kotlinx.android.synthetic.main.layout_list_empty.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.Calendar.*
+import kotlin.collections.HashMap
 
 
 @AndroidEntryPoint
 class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnItemClickListener {
+    private var alarmManager: AlarmManager? = null
+    private var notifyPendingIntent: PendingIntent? = null
     private val viewModel: WeatherViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var searchView: SearchView
+
+    /*// Notification ID.
+    private val NOTIFICATION_ID = 0
+
+    // Notification channel ID.
+    private val PRIMARY_CHANNEL_ID = "weather_notification_channel"
+    private var mNotificationManager: NotificationManager? = null*/
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -67,6 +90,19 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
             viewModel.update()
             getWeatherByLocation()
         }
+
+        /*mNotificationManager = requireContext().getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val notifyIntent = Intent(requireContext(), AlarmReceiver::class.java)
+
+        notifyPendingIntent = PendingIntent.getBroadcast(
+            requireContext(), NOTIFICATION_ID, notifyIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        alarmManager = requireContext().getSystemService(ALARM_SERVICE) as AlarmManager
+
+        createNotificationChannel()*/
+
     }
 
     private fun initBinding(view: View) {
@@ -331,11 +367,27 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                     val builder = AlertDialog.Builder(it)
                     builder.apply {
                         setPositiveButton("Google") { dialog, id ->
-                            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(constructGoogleMapsUri(weather.latitude, weather.longitude, 10)))
+                            val browserIntent = Intent(
+                                Intent.ACTION_VIEW, Uri.parse(
+                                    constructGoogleMapsUri(
+                                        weather.latitude,
+                                        weather.longitude,
+                                        10
+                                    )
+                                )
+                            )
                             startActivity(browserIntent)
                         }
                         setNegativeButton("Yandex") { dialog, id ->
-                            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(constructYandexMapsUri(weather.longitude, weather.latitude, 10)))
+                            val browserIntent = Intent(
+                                Intent.ACTION_VIEW, Uri.parse(
+                                    constructYandexMapsUri(
+                                        weather.longitude,
+                                        weather.latitude,
+                                        10
+                                    )
+                                )
+                            )
                             startActivity(browserIntent)
                         }
                         setNeutralButton("Cancel") { dialog, id ->
@@ -348,6 +400,50 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                 }
                 alertDialog.show()
             }
+            R.id.notify -> {
+
+                // Every day at 9 PM
+                val datetimeToAlarm = Calendar.getInstance(Locale.getDefault())
+                datetimeToAlarm.timeInMillis = System.currentTimeMillis()
+                datetimeToAlarm.set(HOUR_OF_DAY, 21)
+                datetimeToAlarm.set(MINUTE, 0)
+                datetimeToAlarm.set(SECOND, 0)
+                datetimeToAlarm.set(MILLISECOND, 0)
+
+                NotificationHelper.createNotificationChannel(
+                    requireContext(),
+                    NotificationManagerCompat.IMPORTANCE_DEFAULT,
+                    false,
+                    weather,
+                    "Daily weather notifications for ${weather.cityName}"
+                )
+
+                NotificationHelper.scheduleNotification(
+                    requireContext(),
+                    datetimeToAlarm,
+                    weather
+                )
+
+                Toast.makeText(
+                    requireContext(),
+                    "Notification set to ${SimpleDateFormat("yyyy-mm-dd hh:mm:ss", Locale.getDefault()).format(datetimeToAlarm.time)}",
+                    Toast.LENGTH_LONG)
+                    .show()
+
+                /*val repeatInterval = 10 * 1000L
+
+                val triggerTime = SystemClock.elapsedRealtime()
+
+                // If the Toggle is turned on, set the repeating alarm with
+                // a 15 minute interval.
+                if (alarmManager != null) {
+                    alarmManager!!.setRepeating(
+                        AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                        triggerTime, repeatInterval,
+                        notifyPendingIntent
+                    )
+                }*/
+            }
         }
     }
 
@@ -358,4 +454,33 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         super.onDestroyView()
         searchView.setOnQueryTextListener(null)
     }
+
+    /**
+     * Creates a Notification channel, for OREO and higher.
+     */
+    /*fun createNotificationChannel() {
+
+        // Create a notification manager object.
+        mNotificationManager = requireContext().getSystemService(NOTIFICATION_SERVICE) as NotificationManager?
+
+        // Notification channels are only available in OREO and higher.
+        // So, add a check on SDK version.
+        if (Build.VERSION.SDK_INT >=
+            Build.VERSION_CODES.O
+        ) {
+
+            // Create the NotificationChannel with all the parameters.
+            val notificationChannel = NotificationChannel(
+                PRIMARY_CHANNEL_ID,
+                "Weather notification",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            notificationChannel.enableLights(true)
+            notificationChannel.lightColor = Color.RED
+            notificationChannel.enableVibration(true)
+            notificationChannel.description = "Notifies about weather"
+            mNotificationManager!!.createNotificationChannel(notificationChannel)
+            Log.v("Notifications", "Channel created")
+        }
+    }*/
 }
