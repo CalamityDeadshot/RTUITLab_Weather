@@ -181,6 +181,7 @@ class WeatherRepository @Inject constructor(
                                                         isLocationEntry = true
                                                         cityName = currentWeather.cityName
                                                         cityId = currentWeather.cityId
+                                                        placeId = "location_place"
                                                     }
                                                 )
                                             }

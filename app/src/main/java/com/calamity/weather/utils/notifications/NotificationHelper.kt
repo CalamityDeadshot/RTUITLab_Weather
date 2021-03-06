@@ -7,11 +7,13 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.calamity.weather.R
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.ui.mainactivity.MainActivity
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
 
@@ -23,6 +25,9 @@ class NotificationHelper {
         const val EXTRA_TEXT = "text"
         const val EXTRA_ID = "cityId"
         const val EXTRA_PLACE_ID = "placeId"
+        const val EXTRA_CITY_NAME = "cityName"
+        const val EXTRA_INTERVAL = "interval"
+        const val EXTRA_NOTIFICATION_TIME = "time"
 
         fun createNotificationChannel(
             context: Context,
@@ -42,6 +47,7 @@ class NotificationHelper {
 
                 val notificationManager = context.getSystemService(NotificationManager::class.java)
                 notificationManager.createNotificationChannel(channel)
+                Log.v("Notifications", "Created channel $channelId")
             }
         }
 
@@ -51,12 +57,11 @@ class NotificationHelper {
             message: String,
             bigText: String,
             channelId: String,
-            cityId: Int,
+            id: Int,
             autoCancel: Boolean = true
         ) {
 
-            //val channelId = "${context.packageName}-${context.getString(R.string.app_name)}"
-
+            Log.v("Notifications", "Fired notification creation with following parameters: $title, $message, $channelId, $id")
             val notificationBuilder = NotificationCompat.Builder(context, channelId).apply {
                 setSmallIcon(R.drawable.ic_launcher_foreground)
                 setContentTitle(title)
@@ -71,35 +76,28 @@ class NotificationHelper {
                 setContentIntent(pendingIntent)
             }
             val notificationManager = NotificationManagerCompat.from(context)
-            notificationManager.notify(cityId, notificationBuilder.build())
+            notificationManager.notify(id, notificationBuilder.build())
 
         }
 
-        fun createPendingIntent(context: Context, weather: Weather): PendingIntent? {
-            val intent = Intent(context.applicationContext, AlarmReceiver::class.java).apply {
-                action = "Weather notification"//context.getString(R.string.action_notify_administer_medication)
-                type = "${weather.placeId}-${weather.cityName}"
-                putExtra(
-                    "content",
-                    "${weather.cityName}: ${weather.weather.temperature.roundToInt()} degrees"
-                )
-            }
-            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        }
 
-
-        fun scheduleNotification(context: Context, timeOfNotification: Calendar, data: Weather) {
+        fun scheduleNotification(context: Context, timeOfNotification: Calendar, repeatInterval: Long, data: Weather) {
             val intent = Intent(context, AlarmReceiver::class.java)
             intent.putExtra(EXTRA_TITLE, "Weather for ${data.cityName}")
-            intent.putExtra(EXTRA_TEXT, "Temperature: ${data.daily[0].temperature.min}/${data.daily[0].temperature.max}}")
-            intent.putExtra(EXTRA_ID, data.cityId)
+            intent.putExtra(EXTRA_TEXT, "Temperature: ${data.daily[0].temperature.min.roundToInt()}°/${data.daily[0].temperature.max.roundToInt()}°")
+            intent.putExtra(EXTRA_ID, data.id)
             intent.putExtra(EXTRA_PLACE_ID, data.placeId)
+            intent.putExtra(EXTRA_CITY_NAME, data.cityName)
+            intent.putExtra(EXTRA_INTERVAL, repeatInterval)
+            intent.putExtra(EXTRA_NOTIFICATION_TIME, (timeOfNotification.timeInMillis + repeatInterval))
             val pending =
-                PendingIntent.getBroadcast(context, data.cityId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                PendingIntent.getBroadcast(context, data.id, intent, PendingIntent.FLAG_UPDATE_CURRENT)
             // Schedule notification
             val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val repeatInterval: Long = 1000 * 60 * 10 // Ten minutes
-            manager.setRepeating(AlarmManager.RTC_WAKEUP, timeOfNotification.timeInMillis, repeatInterval, pending)
+            manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeOfNotification.timeInMillis, pending)
+            Log.v("Notifications", "Scheduled notification id ${data.id} with start at " +
+                    "${SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault()).format(timeOfNotification.timeInMillis)} and interval " +
+                    SimpleDateFormat("MM-dd hh:mm:ss", Locale.getDefault()).format(repeatInterval))
         }
     }
 }

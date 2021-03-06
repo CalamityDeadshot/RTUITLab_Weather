@@ -1,6 +1,7 @@
 package com.calamity.weather.ui.adapters
 
 import android.annotation.SuppressLint
+import android.app.TimePickerDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Rect
@@ -8,6 +9,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TimePicker
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
@@ -16,6 +19,7 @@ import com.calamity.weather.R
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.data.api.openweather.subclasses.onecall.DailyWeather
 import com.calamity.weather.databinding.ItemWeatherBinding
+import com.calamity.weather.ui.weather.TimePickerFragment
 import com.github.florent37.expansionpanel.viewgroup.ExpansionLayoutCollection
 import java.util.*
 import kotlin.collections.HashMap
@@ -26,14 +30,16 @@ import kotlin.math.roundToInt
 class WeatherAdapter(
     private val context: Context,
     private val imageMap: HashMap<String, Int>,
-    private val listener: OnItemClickListener
+    private val listener: OnItemClickListener,
+    private val onDatePickedListener: OnDatePickedListener,
+    private val superFragment: Fragment
     ) : ListAdapter<Weather, WeatherAdapter.WeatherViewHolder>(DiffCallback()) {
 
     private val expansionsCollection = ExpansionLayoutCollection().apply { openOnlyOne(true) }
 
     inner class WeatherViewHolder(private val binding: ItemWeatherBinding, private val dailyAdapter: DailyWeatherAdapter) : RecyclerView.ViewHolder(
         binding.root
-    ) {
+    ), TimePickerDialog.OnTimeSetListener {
 
         var viewExpanded = false
 
@@ -43,7 +49,10 @@ class WeatherAdapter(
                     listener.onClick(it, getItem(adapterPosition))
                 }
                 notify.setOnClickListener {
-                    listener.onClick(it, getItem(adapterPosition))
+                    /*val action = WeatherFragmentDirections.actionCurrentWeatherFragmentToTimePickerDialog()
+                    superFragment.findNavController().navigate(action)*/
+                    // We use this instead of commented code because using NavigationComponent there is no way to set a listener in a meaningful way
+                    TimePickerFragment(this@WeatherViewHolder).show(superFragment.childFragmentManager, "Time picker")
                 }
             }
         }
@@ -115,6 +124,10 @@ class WeatherAdapter(
 
             }
         }
+
+        override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
+            onDatePickedListener.onDatePicked(getItem(adapterPosition), hourOfDay, minute)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WeatherViewHolder {
@@ -143,6 +156,10 @@ class WeatherAdapter(
 
     interface OnItemClickListener {
         fun onClick(view: View, weather: Weather)
+    }
+
+    interface OnDatePickedListener {
+        fun onDatePicked(weather: Weather, hour: Int, minute: Int)
     }
 
 
