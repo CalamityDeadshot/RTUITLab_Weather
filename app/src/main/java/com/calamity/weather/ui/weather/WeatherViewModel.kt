@@ -37,7 +37,10 @@ class WeatherViewModel @Inject constructor (
         repository.refreshWeather()
     }
 
-    suspend fun addGpsWeather(lat: Double, lon: Double) = repository.getWeatherByLocation(lat, lon)
+    suspend fun addGpsWeather(lat: Double, lon: Double) {
+        busy.value = true
+        repository.getWeatherByLocation(lat, lon)
+    }
 
     fun onEntrySwiped(weather: Weather) = viewModelScope.launch {
         repository.delete(weather)

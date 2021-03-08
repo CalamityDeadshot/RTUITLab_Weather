@@ -133,6 +133,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         }
 
         viewModel.busy.observe(viewLifecycleOwner) {
+            switchTo(R.id.recycler_swipe_layout)
             recycler_swipe_layout.isRefreshing = it
         }
 
@@ -401,6 +402,11 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
             "Notification set to ${SimpleDateFormat("yyyy-mm-dd hh:mm:ss", Locale.getDefault()).format(datetimeToAlarm.time)}",
             Toast.LENGTH_LONG)
             .show()
+    }
+
+    private fun switchTo(id: Int) {
+        if (switcher.currentView.id == id) return
+        else switcher.showNext()
     }
 
     private fun constructGoogleMapsUri(lat: Double, lon: Double, zoom: Int): String = "${Variables.googleMapsUrl}&center=$lat,$lon&zoom=$zoom"
