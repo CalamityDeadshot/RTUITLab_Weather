@@ -381,13 +381,15 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         val datetimeToAlarm = Calendar.getInstance(Locale.getDefault())
         datetimeToAlarm.set(Calendar.HOUR_OF_DAY, hour)
         datetimeToAlarm.set(Calendar.MINUTE, minute)
+        datetimeToAlarm.set(SECOND, 0)
+        datetimeToAlarm.set(MILLISECOND, 0)
 
         NotificationHelper.createNotificationChannel(
             requireContext(),
             NotificationManagerCompat.IMPORTANCE_DEFAULT,
             false,
             weather,
-            "Daily weather notifications for ${weather.cityName}"
+            requireContext().getString(R.string.weather_notification_channel_desc, weather.cityName)
         )
 
         NotificationHelper.scheduleNotification(

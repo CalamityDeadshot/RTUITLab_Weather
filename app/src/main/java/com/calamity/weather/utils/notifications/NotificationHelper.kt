@@ -21,13 +21,12 @@ import kotlin.math.roundToInt
 class NotificationHelper {
     companion object {
 
-        const val EXTRA_TITLE = "title"
-        const val EXTRA_TEXT = "text"
         const val EXTRA_ID = "cityId"
         const val EXTRA_PLACE_ID = "placeId"
-        const val EXTRA_CITY_NAME = "cityName"
         const val EXTRA_INTERVAL = "interval"
         const val EXTRA_NOTIFICATION_TIME = "time"
+        const val EXTRA_LATITUDE = "latitude"
+        const val EXTRA_LONGITUDE = "time"
 
         fun createNotificationChannel(
             context: Context,
@@ -41,7 +40,11 @@ class NotificationHelper {
 
                 // Format: $placeId-$cityName
                 val channelId = "${data.placeId}-${data.cityName}"
-                val channel = NotificationChannel(channelId, "Weather for ${data.cityName}", importance)
+                val channel = NotificationChannel(
+                    channelId,
+                    context.getString(R.string.weather_notification_channel_name, data.cityName),
+                    importance
+                )
                 channel.description = description
                 channel.setShowBadge(showBadge)
 
@@ -83,13 +86,12 @@ class NotificationHelper {
 
         fun scheduleNotification(context: Context, timeOfNotification: Calendar, repeatInterval: Long, data: Weather) {
             val intent = Intent(context, AlarmReceiver::class.java)
-            intent.putExtra(EXTRA_TITLE, "Weather for ${data.cityName}")
-            intent.putExtra(EXTRA_TEXT, "Temperature: ${data.daily[0].temperature.min.roundToInt()}°/${data.daily[0].temperature.max.roundToInt()}°")
             intent.putExtra(EXTRA_ID, data.id)
             intent.putExtra(EXTRA_PLACE_ID, data.placeId)
-            intent.putExtra(EXTRA_CITY_NAME, data.cityName)
             intent.putExtra(EXTRA_INTERVAL, repeatInterval)
             intent.putExtra(EXTRA_NOTIFICATION_TIME, (timeOfNotification.timeInMillis + repeatInterval))
+            intent.putExtra(EXTRA_LATITUDE, data.latitude)
+            intent.putExtra(EXTRA_LONGITUDE, data.longitude)
             val pending =
                 PendingIntent.getBroadcast(context, data.id, intent, PendingIntent.FLAG_UPDATE_CURRENT)
             // Schedule notification
