@@ -5,12 +5,16 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Rect
+import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TimePicker
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
@@ -18,11 +22,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.calamity.weather.R
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.data.api.openweather.subclasses.onecall.DailyWeather
+import com.calamity.weather.data.repository.RainViewerRepository
 import com.calamity.weather.databinding.ItemWeatherBinding
 import com.calamity.weather.ui.weather.TimePickerFragment
 import com.github.florent37.expansionpanel.viewgroup.ExpansionLayoutCollection
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.*
+import com.squareup.picasso.Picasso
+import kotlinx.coroutines.launch
+import java.net.URL
 import java.util.*
-import kotlin.collections.HashMap
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -33,16 +42,20 @@ class WeatherAdapter(
     private val listener: OnItemClickListener,
     private val onDatePickedListener: OnDatePickedListener,
     private val superFragment: Fragment
-    ) : ListAdapter<Weather, WeatherAdapter.WeatherViewHolder>(DiffCallback()) {
+) : ListAdapter<Weather, WeatherAdapter.WeatherViewHolder>(DiffCallback()) {
 
     private val expansionsCollection = ExpansionLayoutCollection().apply { openOnlyOne(true) }
+    private val repository: RainViewerRepository = RainViewerRepository()
 
-    inner class WeatherViewHolder(private val binding: ItemWeatherBinding, private val dailyAdapter: DailyWeatherAdapter) : RecyclerView.ViewHolder(
+    inner class WeatherViewHolder(
+        private val binding: ItemWeatherBinding,
+        private val dailyAdapter: DailyWeatherAdapter
+    ) : RecyclerView.ViewHolder(
         binding.root
-    ), TimePickerDialog.OnTimeSetListener {
+    ), TimePickerDialog.OnTimeSetListener, OnMapReadyCallback {
 
         var viewExpanded = false
-
+        lateinit var gMap: GoogleMap
         init {
             binding.apply {
                 openMapBtn.setOnClickListener {
@@ -52,7 +65,14 @@ class WeatherAdapter(
                     /*val action = WeatherFragmentDirections.actionCurrentWeatherFragmentToTimePickerDialog()
                     superFragment.findNavController().navigate(action)*/
                     // We use this instead of commented code because using NavigationComponent there is no way to set a listener in a meaningful way
-                    TimePickerFragment(this@WeatherViewHolder).show(superFragment.childFragmentManager, "Time picker")
+                    TimePickerFragment(this@WeatherViewHolder).show(
+                        superFragment.childFragmentManager,
+                        "Time picker"
+                    )
+                }
+                with(map) {
+                    onCreate(null)
+                    getMapAsync(this@WeatherViewHolder)
                 }
             }
         }
@@ -92,9 +112,13 @@ class WeatherAdapter(
                     adapter = dailyAdapter
                     layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
                     setHasFixedSize(true)
-                    addItemDecoration(DailyWeatherAdapter.MarginItemDecoration(resources.getDimensionPixelSize(
-                        R.dimen.recyclerview_margin
-                    )))
+                    addItemDecoration(
+                        DailyWeatherAdapter.MarginItemDecoration(
+                            resources.getDimensionPixelSize(
+                                R.dimen.recyclerview_margin
+                            )
+                        )
+                    )
                 }
 
                 val list = ArrayList<DailyWeather>()
@@ -107,6 +131,9 @@ class WeatherAdapter(
                     viewExpanded = expanded
                 }
 
+                Log.v("Recyclerview", "Current item is ${getItem(adapterPosition).cityName}")
+
+                setMapLocation()
 
 
                 // Binding temperature color
@@ -128,6 +155,51 @@ class WeatherAdapter(
         override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
             onDatePickedListener.onDatePicked(getItem(adapterPosition), hourOfDay, minute)
         }
+
+        override fun onMapReady(googleMap: GoogleMap) {
+            Log.v("Maps", "OnReady")
+            MapsInitializer.initialize(superFragment.activity)
+            gMap = googleMap
+            with(gMap.uiSettings) {
+                isZoomControlsEnabled = false
+                isCompassEnabled = false
+                isMapToolbarEnabled = false
+                isMyLocationButtonEnabled = false
+                isRotateGesturesEnabled = false
+                isScrollGesturesEnabled = false
+                isTiltGesturesEnabled = false
+                isZoomGesturesEnabled = false
+            }
+            binding.map.onResume()
+            setMapLocation()
+        }
+        private fun setMapLocation() {
+            if (!::gMap.isInitialized) return
+            Log.v("Maps", "setting location")
+            val weather = getItem(adapterPosition)
+            with(gMap) {
+                moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(weather.latitude, weather.longitude), 10f))
+                mapType = GoogleMap.MAP_TYPE_NORMAL
+                setOnMapClickListener {
+                    Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show()
+                }
+            }
+            superFragment.viewLifecycleOwner.lifecycleScope.launch {
+                repository.getInfo { response ->
+                    /*val url = "${response.host}${response.radar.past.last().path}/256/10/${weather.latitude}/${weather.longitude}/1/1_1.png"
+                    Log.v("Rainviewer", "URI: $url")*/
+                    gMap.addTileOverlay(TileOverlayOptions().tileProvider(
+                        object: UrlTileProvider(256, 256) {
+                            override fun getTileUrl(x: Int, y: Int, zoom: Int): URL {
+                                val s = "${response.host}${response.radar.past.last().path}/256/$zoom/$x/$y/1/1_1.png"
+                                Log.v("Rainviewer", s)
+                                return URL(s)
+                            }
+                        }
+                    ).transparency(.5F))
+                }
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WeatherViewHolder {
@@ -143,6 +215,12 @@ class WeatherAdapter(
     override fun onBindViewHolder(holder: WeatherViewHolder, position: Int) {
         val current = getItem(position)
         holder.bind(current)
+    }
+
+    override fun onViewRecycled(holder: WeatherViewHolder) {
+        holder.gMap.clear()
+        holder.gMap.mapType = GoogleMap.MAP_TYPE_NONE
+        super.onViewRecycled(holder)
     }
 
     class DiffCallback : DiffUtil.ItemCallback<Weather>() {
@@ -195,20 +273,29 @@ class WeatherAdapter(
         val interval_G = (maxGreen - minGreen) / abs(from - to)
         val interval_B = (maxBlue - minBlue) / abs(from - to)
 
-        Log.v("Mapping color", "resulting color: ${(temp + to) * interval_R}, ${(temp + to) * interval_G}, ${(temp + to) * interval_B}")
+        Log.v(
+            "Mapping color",
+            "resulting color: ${(temp + to) * interval_R}, ${(temp + to) * interval_G}, ${(temp + to) * interval_B}"
+        )
 
-        return Color.rgb((temp + to) * interval_R, (temp + to) * interval_G, (temp + to) * interval_B)
+        return Color.rgb(
+            (temp + to) * interval_R,
+            (temp + to) * interval_G,
+            (temp + to) * interval_B
+        )
     }
 
     private fun getWeekDayName(day: Int): String =
-        context.getString(when (day) {
-            Calendar.MONDAY -> R.string.monday
-            Calendar.TUESDAY -> R.string.tuesday
-            Calendar.WEDNESDAY -> R.string.wednesday
-            Calendar.THURSDAY -> R.string.thursday
-            Calendar.FRIDAY -> R.string.friday
-            Calendar.SATURDAY -> R.string.saturday
-            Calendar.SUNDAY -> R.string.sunday
-            else -> R.string.language_code
-        })
+        context.getString(
+            when (day) {
+                Calendar.MONDAY -> R.string.monday
+                Calendar.TUESDAY -> R.string.tuesday
+                Calendar.WEDNESDAY -> R.string.wednesday
+                Calendar.THURSDAY -> R.string.thursday
+                Calendar.FRIDAY -> R.string.friday
+                Calendar.SATURDAY -> R.string.saturday
+                Calendar.SUNDAY -> R.string.sunday
+                else -> R.string.language_code
+            }
+        )
 }

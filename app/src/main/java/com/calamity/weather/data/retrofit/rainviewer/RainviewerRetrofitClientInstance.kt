@@ -1,15 +1,12 @@
-package com.calamity.weather.data.retrofit
+package com.calamity.weather.data.retrofit.rainviewer
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-
-class RetrofitClientInstance {
-
+class RainviewerRetrofitClientInstance {
     companion object {
         private var retrofit: Retrofit? = null
-        private val BASE_URL = "https://api.openweathermap.org/data/2.5/"
-        val API_KEY = "acf9cdac3b6bc576f123ce8c2ba69136"
+        private val BASE_URL = "https://api.rainviewer.com/public/"
         fun getRetrofitInstance(): Retrofit? {
             // If retrofit instance is null, build it
             return retrofit ?: Retrofit.Builder()

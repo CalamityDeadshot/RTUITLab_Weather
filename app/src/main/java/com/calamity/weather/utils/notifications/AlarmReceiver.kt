@@ -7,12 +7,10 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.calamity.weather.R
-import com.calamity.weather.data.retrofit.RetrofitClientInstance
-import com.calamity.weather.data.retrofit.WeatherService
+import com.calamity.weather.data.retrofit.openweather.OpenweatherRetrofitClientInstance
+import com.calamity.weather.data.retrofit.openweather.WeatherService
 import com.calamity.weather.utils.Variables
 import com.calamity.weather.utils.enqueue
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -40,9 +38,9 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val async = goAsync()
 
-        RetrofitClientInstance.getRetrofitInstance()!!.create(WeatherService::class.java)
+        OpenweatherRetrofitClientInstance.getRetrofitInstance()!!.create(WeatherService::class.java)
             .getCurrentWeather(
-                RetrofitClientInstance.API_KEY,
+                OpenweatherRetrofitClientInstance.API_KEY,
                 latitude,
                 longitude,
                 Variables.units,

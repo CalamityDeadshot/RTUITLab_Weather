@@ -13,7 +13,6 @@ import com.calamity.weather.R
 import com.calamity.weather.data.api.places.PlacesPrediction
 import com.calamity.weather.databinding.FragmentSearchBinding
 import com.calamity.weather.ui.adapters.CitiesAdapter
-import com.calamity.weather.utils.PlacesApi
 import com.calamity.weather.utils.Variables
 import com.calamity.weather.utils.onQueryTextChanged
 import com.google.android.libraries.places.api.Places
@@ -35,7 +34,7 @@ class SearchFragment : Fragment(R.layout.fragment_search), CitiesAdapter.OnItemC
         super.onViewCreated(view, savedInstanceState)
 
         setHasOptionsMenu(true)
-        Places.initialize(requireContext(), PlacesApi.API_KEY)
+        Places.initialize(requireContext(), Variables.googleApiKey)
         placesClient = Places.createClient(requireContext())
         viewModel.provideClient(placesClient)
 

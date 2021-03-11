@@ -200,6 +200,14 @@
                     android:textColor="@color/white"
                     android:textAllCaps="false"/>
 
+                <com.google.android.gms.maps.MapView
+                    android:id="@+id/map"
+                    android:layout_width="match_parent"
+                    android:layout_height="320dp"
+                    app:mapType="none"
+                    android:layout_below="@id/notify"/>
+
+
             </RelativeLayout>
 
         </com.github.florent37.expansionpanel.ExpansionLayout>

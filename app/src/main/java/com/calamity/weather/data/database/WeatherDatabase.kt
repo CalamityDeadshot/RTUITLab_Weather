@@ -1,22 +1,15 @@
 package com.calamity.weather.data.database
 
-import android.util.Log
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.calamity.weather.data.api.openweather.ApiResponseWrapper
 import com.calamity.weather.data.api.openweather.CurrentWeather
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.data.dao.CurrentWeatherDao
 import com.calamity.weather.data.dao.WeatherDao
-import com.calamity.weather.data.retrofit.WeatherService
-import com.calamity.weather.data.retrofit.RetrofitClientInstance
 import com.calamity.weather.di.ApplicationScope
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Provider
 

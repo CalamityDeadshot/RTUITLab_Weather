@@ -1,4 +1,4 @@
-package com.calamity.weather.data.retrofit
+package com.calamity.weather.data.retrofit.openweather
 
 import com.calamity.weather.data.api.openweather.ApiResponseWrapper
 import com.calamity.weather.data.api.openweather.CurrentWeather

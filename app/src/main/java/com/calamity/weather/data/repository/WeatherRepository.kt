@@ -5,8 +5,8 @@ import com.calamity.weather.data.api.openweather.CurrentWeather
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.data.api.places.PlacesPrediction
 import com.calamity.weather.data.database.WeatherDatabase
-import com.calamity.weather.data.retrofit.WeatherService
-import com.calamity.weather.data.retrofit.RetrofitClientInstance
+import com.calamity.weather.data.retrofit.openweather.WeatherService
+import com.calamity.weather.data.retrofit.openweather.OpenweatherRetrofitClientInstance
 import com.calamity.weather.utils.Variables
 import com.calamity.weather.utils.enqueue
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +20,8 @@ import javax.inject.Inject
 class WeatherRepository @Inject constructor(
     private val database: WeatherDatabase,
 ) {
-    private val service: WeatherService = RetrofitClientInstance.getRetrofitInstance()!!.create(WeatherService::class.java)
+    private val service: WeatherService = OpenweatherRetrofitClientInstance.getRetrofitInstance()!!.create(
+        WeatherService::class.java)
 
     // Methods belonging to current weather API call
 
@@ -28,7 +29,7 @@ class WeatherRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             val currentDao = database.currentWeatherDao()
             currentDao.getCurrentWeatherAsList().toList().forEach { weather ->
-                service.getCurrentWeather(RetrofitClientInstance.API_KEY, weather.cityId, Variables.units, Variables.languageCode)
+                service.getCurrentWeather(OpenweatherRetrofitClientInstance.API_KEY, weather.cityId, Variables.units, Variables.languageCode)
                     .enqueue(object : retrofit2.Callback<CurrentWeather> {
                         override fun onResponse(
                             call: Call<CurrentWeather>,
@@ -50,7 +51,7 @@ class WeatherRepository @Inject constructor(
 
     suspend fun getCurrentWeatherByLocation(lat: Double, lon: Double) {
         withContext(Dispatchers.IO) {
-            service.getCurrentWeather(RetrofitClientInstance.API_KEY, lat, lon, Variables.units, Variables.languageCode)
+            service.getCurrentWeather(OpenweatherRetrofitClientInstance.API_KEY, lat, lon, Variables.units, Variables.languageCode)
                 .enqueue {
                     onResponse = { response ->
 
@@ -80,7 +81,7 @@ class WeatherRepository @Inject constructor(
 
     suspend fun addCurrentWeather(place: PlacesPrediction) {
         withContext(Dispatchers.IO) {
-            service.getCurrentWeather(RetrofitClientInstance.API_KEY, place.latitude, place.longitude, Variables.units, Variables.languageCode)
+            service.getCurrentWeather(OpenweatherRetrofitClientInstance.API_KEY, place.latitude, place.longitude, Variables.units, Variables.languageCode)
                 .enqueue{
                     onResponse = { response ->
 
@@ -118,7 +119,7 @@ class WeatherRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             val dao = database.weatherDao()
             dao.getWeatherAsList().toList().forEach { weather ->
-                service.getWeather(RetrofitClientInstance.API_KEY, weather.latitude, weather.longitude,Variables.exclude,Variables.units, Variables.languageCode)
+                service.getWeather(OpenweatherRetrofitClientInstance.API_KEY, weather.latitude, weather.longitude,Variables.exclude,Variables.units, Variables.languageCode)
                         .enqueue{
                             onResponse = { response ->
                                 GlobalScope.launch {
@@ -144,7 +145,7 @@ class WeatherRepository @Inject constructor(
     suspend fun getWeatherByLocation(lat: Double, lon: Double) {
         withContext(Dispatchers.IO) {
             // First call current weather info to get name
-            service.getCurrentWeather(RetrofitClientInstance.API_KEY, lat, lon, Variables.units, Variables.languageCode)
+            service.getCurrentWeather(OpenweatherRetrofitClientInstance.API_KEY, lat, lon, Variables.units, Variables.languageCode)
                 .enqueue {
                     onResponse = { response ->
 
@@ -172,7 +173,7 @@ class WeatherRepository @Inject constructor(
                             // If user changed their location, add a new entry
                             if (isNewLocationEntry) {
                                 // Then use OneCall to get full info
-                                service.getWeather(RetrofitClientInstance.API_KEY, lat, lon, Variables.exclude, Variables.units, Variables.languageCode)
+                                service.getWeather(OpenweatherRetrofitClientInstance.API_KEY, lat, lon, Variables.exclude, Variables.units, Variables.languageCode)
                                     .enqueue {
                                         onResponse = { oneCallResponse ->
                                             GlobalScope.launch {
@@ -198,7 +199,7 @@ class WeatherRepository @Inject constructor(
     // This method is used to add new entries from Search screen
     suspend fun addWeather(place: PlacesPrediction) {
         withContext(Dispatchers.IO) {
-            service.getWeather(RetrofitClientInstance.API_KEY, place.latitude, place.longitude, Variables.exclude, Variables.units, Variables.languageCode)
+            service.getWeather(OpenweatherRetrofitClientInstance.API_KEY, place.latitude, place.longitude, Variables.exclude, Variables.units, Variables.languageCode)
                 .enqueue{
                     onResponse = { response ->
 
