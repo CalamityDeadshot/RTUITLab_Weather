@@ -21,7 +21,6 @@ class CitiesAdapter(private val listener: OnItemClickListener) : ListAdapter<Pla
                     if (position != RecyclerView.NO_POSITION) {
                         val place = getItem(position)
                         btnAdd.animate().rotation(if (place.isAdded) 45f else 0f).start()
-                        println("Current item state (isAdded): ${place.isAdded}")
                         listener.onAddClick(place, !place.isAdded)
                     }
                 }
@@ -33,7 +32,7 @@ class CitiesAdapter(private val listener: OnItemClickListener) : ListAdapter<Pla
                 val cityName = prediction.fullText.split(", ")[0]
                 locationName.text = cityName
                 fullName.text = prediction.fullText
-                btnAdd.animate().rotation(if (prediction.isAdded) 45f else 0f).start()/*.rotation = if (prediction.isAdded) 45f else 0f*/
+                btnAdd.animate().rotation(if (prediction.isAdded) 45f else 0f).start()
             }
         }
     }

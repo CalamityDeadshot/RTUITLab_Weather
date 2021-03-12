@@ -28,6 +28,16 @@
     <string name="weather_notification_text">Minimum temperature: %1$d°\nMaximum temperature: %2$d°\nFeels like: %3$d°</string>
     <string name="weather_notification_channel_name">Weather for %1$s</string>
     <string name="weather_notification_channel_desc">Daily weather notifications for %1$s</string>
+    <string name="schedule_notification">Schedule notification</string>
+    <string name="precipitation_map">Precipitation map</string>
+    <string name="notification_scheduled">Notification scheduled</string>
+    <string name="choose_maps_msg">Which maps do you want to use?</string>
+    <string name="choose_maps">Choose maps</string>
+    <string name="yandex">Yandex</string>
+    <string name="google">Google</string>
+    <string name="error_getting_location">Error getting location. Add cities manually</string>
+    <string name="deleted">Deleted</string>
+    <string name="undo">Undo</string>
 
 
 </resources>

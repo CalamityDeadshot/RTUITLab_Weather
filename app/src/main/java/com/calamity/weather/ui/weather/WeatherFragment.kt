@@ -59,8 +59,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
             viewModel.event.collect { event ->
                 when (event) {
                     is WeatherViewModel.WeatherEvent.ShowUndoDeleteMessage -> {
-                        Snackbar.make(requireView(), "Deleted", Snackbar.LENGTH_LONG)
-                            .setAction("Undo") {
+                        Snackbar.make(requireView(), getString(R.string.deleted), Snackbar.LENGTH_LONG)
+                            .setAction(getString(R.string.undo)) {
                                 viewModel.onUndoDelete(event.weather)
                             }.show()
                     }
@@ -242,8 +242,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
 
                     getWeatherByLocation()
 
-                } else {
-                    Toast.makeText(context, "Permission Denied!", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -258,7 +256,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
             if (it == null) {
                 Toast.makeText(
                     requireContext(),
-                    "Error getting location. Add cities manually",
+                    getString(R.string.error_getting_location),
                     Toast.LENGTH_LONG
                 ).show()
                 return@addOnSuccessListener
@@ -339,7 +337,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                 val alertDialog: AlertDialog = activity.let {
                     val builder = AlertDialog.Builder(it)
                     builder.apply {
-                        setPositiveButton("Google") { dialog, id ->
+                        setPositiveButton(getString(R.string.google)) { dialog, id ->
                             val browserIntent = Intent(
                                 Intent.ACTION_VIEW, Uri.parse(
                                     constructGoogleMapsUri(
@@ -351,7 +349,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                             )
                             startActivity(browserIntent)
                         }
-                        setNegativeButton("Yandex") { dialog, id ->
+                        setNegativeButton(getString(R.string.yandex)) { dialog, id ->
                             val browserIntent = Intent(
                                 Intent.ACTION_VIEW, Uri.parse(
                                     constructYandexMapsUri(
@@ -367,8 +365,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
 
                         }
                     }
-                    builder.setMessage("Which maps do you want to use?")
-                        .setTitle("Choose maps")
+                    builder.setMessage(getString(R.string.choose_maps_msg))
+                        .setTitle(getString(R.string.choose_maps))
                     builder.create()
                 }
                 alertDialog.show()
@@ -401,7 +399,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
 
         Toast.makeText(
             requireContext(),
-            "Notification set to ${SimpleDateFormat("yyyy-mm-dd hh:mm:ss", Locale.getDefault()).format(datetimeToAlarm.time)}",
+            requireContext().getString(R.string.notification_scheduled),
             Toast.LENGTH_LONG)
             .show()
     }
