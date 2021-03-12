@@ -3,6 +3,7 @@ package com.calamity.weather.ui.adapters
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Rect
 import android.util.Log
@@ -23,6 +24,7 @@ import com.github.florent37.expansionpanel.viewgroup.ExpansionLayoutCollection
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import kotlinx.coroutines.launch
+import java.lang.Integer.min
 import java.net.URL
 import java.util.*
 import kotlin.math.abs
@@ -130,17 +132,26 @@ class WeatherAdapter(
 
 
                 // Binding temperature color
-                /*val minColor = context.getColor(R.color.min_temperature)
-                val maxColor = context.getColor(R.color.max_temperature)
+                val minColor = context.getColor(
+                    if (weather.weather.temperature.toInt() < 17)
+                        R.color.max_temperature_cold
+                    else R.color.min_temperature_warm
+                )
+                val maxColor = context.getColor(
+                    if (weather.weather.temperature.toInt() < 17)
+                        R.color.min_temperature
+                    else
+                        R.color.max_temperature
+                )
                 val color = getMappedColor(
                     weather.weather.temperature.toInt(),
-                    minColor,
-                    maxColor,
-                    -50,
-                    50
+                    minColor,//context.getColor(R.color.quantum_googred), //minColor,
+                    maxColor, //context.getColor(R.color.quantum_orange), //maxColor,
+                    if (weather.weather.temperature.toInt() < 17) -50 else 17,
+                    if (weather.weather.temperature.toInt() < 17) 17 else 50
                 )
-
-                headerLayout.backgroundTintList = ColorStateList.valueOf(color)*/
+                Log.v("Mapping", "=============================")
+                headerLayout.backgroundTintList = ColorStateList.valueOf(color)
 
             }
         }
@@ -252,31 +263,47 @@ class WeatherAdapter(
             }
         }
     }
-
+    val TAG = "Mapping color"
     // TODO: make work
     fun getMappedColor(temp: Int, minColor: Int, maxColor: Int, from: Int, to: Int): Int {
+
+        Log.v(TAG, temp.toString())
 
         val minRed = minColor shr 16 and 0xFF
         val minGreen = minColor shr 8 and 0xFF
         val minBlue = minColor and 0xFF
-
+        Log.v(
+            TAG,
+            "Obtained min color: $minRed, $minGreen, $minBlue"
+        )
         val maxRed = maxColor shr 16 and 0xFF
         val maxGreen = maxColor shr 8 and 0xFF
         val maxBlue = maxColor and 0xFF
-
-        val interval_R = (maxRed - minRed) / abs(from - to)
-        val interval_G = (maxGreen - minGreen) / abs(from - to)
-        val interval_B = (maxBlue - minBlue) / abs(from - to)
+        Log.v(
+            TAG,
+            "Obtained max color: $maxRed, $maxGreen, $maxBlue"
+        )
+        val interval_R: Double = abs((maxRed - minRed).toDouble() / abs(from - to).toDouble())
+        Log.v(TAG, "i_r: max-min = ${(maxRed - minRed).toDouble()} / ${abs(from - to)} = $interval_R")
+        val interval_G: Double = abs((maxGreen - minGreen) / abs(from - to).toDouble())
+        Log.v(TAG, "i_r: max-min = ${(maxGreen - minGreen).toDouble()} / ${abs(from - to)} = $interval_G")
+        val interval_B: Double = abs((maxBlue - minBlue) / abs(from - to).toDouble())
+        Log.v(TAG, "i_r: max-min = ${(maxBlue - minBlue).toDouble()} / ${abs(from - to)} = $interval_B")
 
         Log.v(
-            "Mapping color",
-            "resulting color: ${(temp + to) * interval_R}, ${(temp + to) * interval_G}, ${(temp + to) * interval_B}"
+            TAG,
+            "Obtained intervals between $from and $to: $interval_R, $interval_G, $interval_B"
+        )
+
+        Log.v(
+            TAG,
+            "resulting color: ${(temp + to) * interval_R + minRed.coerceAtLeast(maxRed)}, ${(temp + to) * interval_G + minGreen.coerceAtLeast(maxGreen)}, ${(temp + to) * interval_B +  minBlue.coerceAtLeast(maxBlue)}"
         )
 
         return Color.rgb(
-            (temp + to) * interval_R,
-            (temp + to) * interval_G,
-            (temp + to) * interval_B
+            ((temp + to) * interval_R + minRed.coerceAtLeast(maxRed)).roundToInt(),
+            ((temp + to) * interval_G + minGreen.coerceAtLeast(maxGreen)).roundToInt(),
+            ((temp + to) * interval_B + minBlue.coerceAtLeast(maxBlue)).roundToInt()
         )
     }
 
