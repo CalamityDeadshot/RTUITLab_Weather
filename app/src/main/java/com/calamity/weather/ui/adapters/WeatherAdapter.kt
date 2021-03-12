@@ -5,20 +5,14 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Rect
-import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TimePicker
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.*
 import com.calamity.weather.R
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.data.api.openweather.subclasses.onecall.DailyWeather
@@ -28,7 +22,6 @@ import com.calamity.weather.ui.weather.TimePickerFragment
 import com.github.florent37.expansionpanel.viewgroup.ExpansionLayoutCollection
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
-import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
 import java.net.URL
 import java.util.*
@@ -161,7 +154,7 @@ class WeatherAdapter(
             MapsInitializer.initialize(superFragment.activity)
             gMap = googleMap
             with(gMap.uiSettings) {
-                isZoomControlsEnabled = false
+                isZoomControlsEnabled = true
                 isCompassEnabled = false
                 isMapToolbarEnabled = false
                 isMyLocationButtonEnabled = false
@@ -178,18 +171,20 @@ class WeatherAdapter(
             Log.v("Maps", "setting location")
             val weather = getItem(adapterPosition)
             with(gMap) {
-                moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(weather.latitude, weather.longitude), 10f))
+                moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(
+                            weather.latitude,
+                            weather.longitude
+                        ), 10f
+                    )
+                )
                 mapType = GoogleMap.MAP_TYPE_NORMAL
-                setOnMapClickListener {
-                    Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show()
-                }
             }
             superFragment.viewLifecycleOwner.lifecycleScope.launch {
                 repository.getInfo { response ->
-                    /*val url = "${response.host}${response.radar.past.last().path}/256/10/${weather.latitude}/${weather.longitude}/1/1_1.png"
-                    Log.v("Rainviewer", "URI: $url")*/
                     gMap.addTileOverlay(TileOverlayOptions().tileProvider(
-                        object: UrlTileProvider(256, 256) {
+                        object : UrlTileProvider(256, 256) {
                             override fun getTileUrl(x: Int, y: Int, zoom: Int): URL {
                                 val s = "${response.host}${response.radar.past.last().path}/256/$zoom/$x/$y/1/1_1.png"
                                 Log.v("Rainviewer", s)

@@ -16,7 +16,6 @@ data class Weather(
     @SerializedName("current") var weather: CurrentWeather,
     @SerializedName("hourly") var hourly: List<HourlyWeather>,
     @SerializedName("daily") var daily: List<DailyWeather>,
-    //@SerializedName("minutely") var minutely: List<CurrentWeather>?,
     var isLocationEntry: Boolean,
     // Obtained from Places API, used to display location name to provide
     // consistency because Places name and openweather name differ

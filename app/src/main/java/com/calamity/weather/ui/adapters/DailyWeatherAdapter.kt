@@ -40,7 +40,7 @@ class DailyWeatherAdapter(val context: Context, private val imageMap: HashMap<St
                 icon.setImageResource(imageMap[weather.weatherConditions[0].icon]!!)
 
                 iconWind.rotation = weather.windDirection
-                wind.text = "${weather.windSpeed}m/s"
+                wind.text = context.getString(R.string.wind_speed, String.format("%.1f", weather.windSpeed))
             }
 
         }

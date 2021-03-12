@@ -171,10 +171,11 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/daily_weather_recycler"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/after_tomorrow"
                     android:orientation="horizontal"
+                    android:layout_centerHorizontal="true"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/item_daily"/>
 

@@ -1,17 +1,12 @@
 package com.calamity.weather.data.repository
 
 import android.util.Log
-import com.calamity.weather.data.api.openweather.CurrentWeather
 import com.calamity.weather.data.api.rainviewer.RainviewerRoot
 import com.calamity.weather.data.retrofit.rainviewer.RainViewerService
 import com.calamity.weather.data.retrofit.rainviewer.RainviewerRetrofitClientInstance
 import com.calamity.weather.utils.enqueue
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Response
 import javax.inject.Inject
 
 

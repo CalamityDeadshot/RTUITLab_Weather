@@ -6,7 +6,8 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="4dp">
+        android:padding="4dp"
+        tools:background="@color/black">
 
         <TextView
             android:id="@+id/day_of_week"
@@ -41,6 +42,7 @@
             android:layout_height="8dp"
             android:layout_alignParentStart="true"
             android:layout_below="@id/icon"
+            android:layout_alignStart="@+id/temp_minmax"
             android:layout_toStartOf="@id/wind"
             android:layout_alignBottom="@id/wind"
             android:src="@drawable/ic_wind_direction"
