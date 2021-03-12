@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Погода</string>
+    <string name="today">Сегодня</string>
+    <string name="tomorrow">Завтра</string>
+    <string name="no_internet">Упс! Кажется, Вы были забанены в интернете. Но надежда остаётся:</string>
+    <string name="no_gps">Вы не дали доступ к геолокации. Жаль, что Вы нам не доверяете! Вы можете добавить города вручную</string>
+    <string name="search">Поиск</string>
+    <string name="retry">Повтор</string>
+    <string name="add_city">Добавить город</string>
+    <string name="search_empty_text">Нажмите на иконку поиска, чтобы найти нужный город</string>
+    <string name="connection_lost">Соединение потеряно</string>
+    <string name="connection_established">Соединение установлено</string>
+    <string name="language_code">ru</string>
+    <string name="monday">Пн</string>
+    <string name="tuesday">Вт</string>
+    <string name="wednesday">Ср</string>
+    <string name="thursday">Чт</string>
+    <string name="friday">Пт</string>
+    <string name="saturday">Сб</string>
+    <string name="sunday">Вс</string>
+    <string name="open_on_map">Открыть на карте</string>
+    <string name="search_nothing_found">По Вашему запросу ничего не найдено</string>
+    <string name="loading">Загрузка…</string>
+    <string name="wind_speed">%1$sм/с</string>
+    <string name="weather_notification_heading">Погода в городе %1$s</string>
+    <string name="weather_notification_text">Минимум: %1$d°\\nМаксимум: %2$d°\\nПо ощущениям: %3$d°</string>
+    <string name="weather_notification_channel_name">Погода для города %1$s</string>
+    <string name="weather_notification_channel_desc">Ежедневные уведомления о погоде в городе %1$s</string>
+    <string name="schedule_notification">Заланировать уведомление</string>
+    <string name="precipitation_map">Карта осадков</string>
+    <string name="notification_scheduled">Уведомление запланировано</string>
+    <string name="choose_maps_msg">Какие карты Вы предпочитаете?</string>
+    <string name="choose_maps">Выберите карты</string>
+    <string name="yandex">Яндекс</string>
+    <string name="error_getting_location">Произошла ошибка при определении геолокации. Добавляйте города вручную</string>
+    <string name="deleted">Удалено</string>
+    <string name="undo">Отмена</string>
+    <string name="cancel">Отмена</string>
+</resources>

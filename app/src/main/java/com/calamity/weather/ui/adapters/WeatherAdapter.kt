@@ -81,19 +81,19 @@ class WeatherAdapter(
                 )
                 temperature.text = "${weather.weather.temperature.roundToInt()}°"
                 if (weather.daily.isNotEmpty()) {
-                    conditions.text = weather.weather.weatherConditions[0].main
+                    conditions.text = weather.weather.weatherConditions[0].description.capitalize(Locale.getDefault())
                     expansionsCollection.add(expansionLayout)
 
                     val todayData = weather.daily[0]
                     today.text =
-                        "${context.resources.getString(R.string.today)} · ${todayData.weatherConditions[0].main}"
+                        "${context.resources.getString(R.string.today)} · ${todayData.weatherConditions[0].description.capitalize(Locale.getDefault())}"
                     temperatureMinmaxToday.text =
                         "${todayData.temperature.max.roundToInt()}° / ${todayData.temperature.min.roundToInt()}°"
 
                     val tomorrowData = weather.daily[1]
 
                     tomorrow.text =
-                        "${context.resources.getString(R.string.tomorrow)} · ${tomorrowData.weatherConditions[0].main}"
+                        "${context.resources.getString(R.string.tomorrow)} · ${tomorrowData.weatherConditions[0].description.capitalize(Locale.getDefault())}"
                     temperatureMinmaxTomorrow.text =
                         "${tomorrowData.temperature.max.roundToInt()}° / ${tomorrowData.temperature.min.roundToInt()}°"
 
@@ -102,7 +102,7 @@ class WeatherAdapter(
                     val calendar = Calendar.getInstance()
                     calendar.timeInMillis = weather.weather.currentTime
                     afterTomorrow.text =
-                        "${getWeekDayName(calendar.get(Calendar.DAY_OF_WEEK))} · ${afterTomorrowData.weatherConditions[0].main}"
+                        "${getWeekDayName(calendar.get(Calendar.DAY_OF_WEEK))} · ${afterTomorrowData.weatherConditions[0].description.capitalize(Locale.getDefault())}"
 
                     temperatureMinmaxAfterTomorrow.text =
                         "${afterTomorrowData.temperature.max.roundToInt()}° / ${afterTomorrowData.temperature.min.roundToInt()}°"
