@@ -186,7 +186,7 @@ class WeatherAdapter(
                 isTiltGesturesEnabled = false
                 isZoomGesturesEnabled = false
             }
-            gMap.setMinZoomPreference(8f)
+            gMap.setMinZoomPreference(5f)
             binding.map.onResume()
             setMapLocation()
         }
