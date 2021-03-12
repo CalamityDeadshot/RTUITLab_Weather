@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Rect
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +23,6 @@ import com.github.florent37.expansionpanel.viewgroup.ExpansionLayoutCollection
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import kotlinx.coroutines.launch
-import java.lang.Integer.min
 import java.net.URL
 import java.util.*
 import kotlin.math.abs
@@ -81,26 +79,34 @@ class WeatherAdapter(
                     if (weather.isLocationEntry) R.drawable.ic_location_24dp else 0,
                     0, 0, 0
                 )
-                conditions.text = weather.weather.weatherConditions[0].main
                 temperature.text = "${weather.weather.temperature.roundToInt()}°"
-                expansionsCollection.add(expansionLayout)
+                if (weather.daily.isNotEmpty()) {
+                    conditions.text = weather.weather.weatherConditions[0].main
+                    expansionsCollection.add(expansionLayout)
 
-                val todayData = weather.daily[0]
-                today.text = "${context.resources.getString(R.string.today)} · ${todayData.weatherConditions[0].main}"
-                temperatureMinmaxToday.text = "${todayData.temperature.max.roundToInt()}° / ${todayData.temperature.min.roundToInt()}°"
+                    val todayData = weather.daily[0]
+                    today.text =
+                        "${context.resources.getString(R.string.today)} · ${todayData.weatherConditions[0].main}"
+                    temperatureMinmaxToday.text =
+                        "${todayData.temperature.max.roundToInt()}° / ${todayData.temperature.min.roundToInt()}°"
 
-                val tomorrowData = weather.daily[1]
+                    val tomorrowData = weather.daily[1]
 
-                tomorrow.text = "${context.resources.getString(R.string.tomorrow)} · ${tomorrowData.weatherConditions[0].main}"
-                temperatureMinmaxTomorrow.text = "${tomorrowData.temperature.max.roundToInt()}° / ${tomorrowData.temperature.min.roundToInt()}°"
+                    tomorrow.text =
+                        "${context.resources.getString(R.string.tomorrow)} · ${tomorrowData.weatherConditions[0].main}"
+                    temperatureMinmaxTomorrow.text =
+                        "${tomorrowData.temperature.max.roundToInt()}° / ${tomorrowData.temperature.min.roundToInt()}°"
 
 
-                val afterTomorrowData = weather.daily[2]
-                val calendar = Calendar.getInstance()
-                calendar.timeInMillis = weather.weather.currentTime
-                afterTomorrow.text = "${getWeekDayName(calendar.get(Calendar.DAY_OF_WEEK))} · ${afterTomorrowData.weatherConditions[0].main}"
+                    val afterTomorrowData = weather.daily[2]
+                    val calendar = Calendar.getInstance()
+                    calendar.timeInMillis = weather.weather.currentTime
+                    afterTomorrow.text =
+                        "${getWeekDayName(calendar.get(Calendar.DAY_OF_WEEK))} · ${afterTomorrowData.weatherConditions[0].main}"
 
-                temperatureMinmaxAfterTomorrow.text = "${afterTomorrowData.temperature.max.roundToInt()}° / ${afterTomorrowData.temperature.min.roundToInt()}°"
+                    temperatureMinmaxAfterTomorrow.text =
+                        "${afterTomorrowData.temperature.max.roundToInt()}° / ${afterTomorrowData.temperature.min.roundToInt()}°"
+                }
 
                 // Handling inner recycler
                 dailyWeatherRecycler.apply {
@@ -126,7 +132,6 @@ class WeatherAdapter(
                     viewExpanded = expanded
                 }
 
-                Log.v("Recyclerview", "Current item is ${getItem(adapterPosition).cityName}")
 
                 setMapLocation()
 
@@ -145,12 +150,11 @@ class WeatherAdapter(
                 )
                 val color = getMappedColor(
                     weather.weather.temperature.toInt(),
-                    minColor,//context.getColor(R.color.quantum_googred), //minColor,
-                    maxColor, //context.getColor(R.color.quantum_orange), //maxColor,
+                    minColor,
+                    maxColor,
                     if (weather.weather.temperature.toInt() < 17) -50 else 17,
                     if (weather.weather.temperature.toInt() < 17) 17 else 50
                 )
-                Log.v("Mapping", "=============================")
                 headerLayout.backgroundTintList = ColorStateList.valueOf(color)
 
             }
@@ -161,7 +165,6 @@ class WeatherAdapter(
         }
 
         override fun onMapReady(googleMap: GoogleMap) {
-            Log.v("Maps", "OnReady")
             MapsInitializer.initialize(superFragment.activity)
             gMap = googleMap
             with(gMap.uiSettings) {
@@ -179,7 +182,6 @@ class WeatherAdapter(
         }
         private fun setMapLocation() {
             if (!::gMap.isInitialized) return
-            Log.v("Maps", "setting location")
             val weather = getItem(adapterPosition)
             with(gMap) {
                 moveCamera(
@@ -198,7 +200,6 @@ class WeatherAdapter(
                         object : UrlTileProvider(256, 256) {
                             override fun getTileUrl(x: Int, y: Int, zoom: Int): URL {
                                 val s = "${response.host}${response.radar.past.last().path}/256/$zoom/$x/$y/1/1_1.png"
-                                Log.v("Rainviewer", s)
                                 return URL(s)
                             }
                         }
@@ -265,45 +266,24 @@ class WeatherAdapter(
     }
     val TAG = "Mapping color"
     // TODO: make work
-    fun getMappedColor(temp: Int, minColor: Int, maxColor: Int, from: Int, to: Int): Int {
+    fun getMappedColor(t: Int, minColor: Int, maxColor: Int, from: Int, to: Int): Int {
 
-        Log.v(TAG, temp.toString())
+        val temp = if (t > 17) abs(t - 50) else abs(t + 50)
 
         val minRed = minColor shr 16 and 0xFF
         val minGreen = minColor shr 8 and 0xFF
         val minBlue = minColor and 0xFF
-        Log.v(
-            TAG,
-            "Obtained min color: $minRed, $minGreen, $minBlue"
-        )
         val maxRed = maxColor shr 16 and 0xFF
         val maxGreen = maxColor shr 8 and 0xFF
         val maxBlue = maxColor and 0xFF
-        Log.v(
-            TAG,
-            "Obtained max color: $maxRed, $maxGreen, $maxBlue"
-        )
         val interval_R: Double = abs((maxRed - minRed).toDouble() / abs(from - to).toDouble())
-        Log.v(TAG, "i_r: max-min = ${(maxRed - minRed).toDouble()} / ${abs(from - to)} = $interval_R")
         val interval_G: Double = abs((maxGreen - minGreen) / abs(from - to).toDouble())
-        Log.v(TAG, "i_r: max-min = ${(maxGreen - minGreen).toDouble()} / ${abs(from - to)} = $interval_G")
         val interval_B: Double = abs((maxBlue - minBlue) / abs(from - to).toDouble())
-        Log.v(TAG, "i_r: max-min = ${(maxBlue - minBlue).toDouble()} / ${abs(from - to)} = $interval_B")
-
-        Log.v(
-            TAG,
-            "Obtained intervals between $from and $to: $interval_R, $interval_G, $interval_B"
-        )
-
-        Log.v(
-            TAG,
-            "resulting color: ${(temp + to) * interval_R + minRed.coerceAtLeast(maxRed)}, ${(temp + to) * interval_G + minGreen.coerceAtLeast(maxGreen)}, ${(temp + to) * interval_B +  minBlue.coerceAtLeast(maxBlue)}"
-        )
 
         return Color.rgb(
-            ((temp + to) * interval_R + minRed.coerceAtLeast(maxRed)).roundToInt(),
-            ((temp + to) * interval_G + minGreen.coerceAtLeast(maxGreen)).roundToInt(),
-            ((temp + to) * interval_B + minBlue.coerceAtLeast(maxBlue)).roundToInt()
+            ((temp) * interval_R + minRed.coerceAtMost(maxRed)).roundToInt(),
+            ((temp) * interval_G + minGreen.coerceAtMost(maxGreen)).roundToInt(),
+            ((temp) * interval_B + minBlue.coerceAtMost(maxBlue)).roundToInt()
         )
     }
 

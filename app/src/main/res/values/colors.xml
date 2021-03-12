@@ -11,6 +11,6 @@
 
     <color name="max_temperature">#f4511e</color>
     <color name="min_temperature_warm">#ffca79</color>
-    <color name="max_temperature_cold">#3888c7</color>
+    <color name="max_temperature_cold">#68bbfc</color>
     <color name="min_temperature">#6200ea</color>
 </resources>

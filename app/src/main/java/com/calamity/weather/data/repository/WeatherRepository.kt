@@ -118,6 +118,22 @@ class WeatherRepository @Inject constructor(
     suspend fun refreshWeather() {
         withContext(Dispatchers.IO) {
             val dao = database.weatherDao()
+            // Mock data
+            /*if (dao.getWeatherAsList().isEmpty()) {
+                for (i in -50..50 step(5)) {
+                    dao.insert(
+                        Weather(
+                            30.0, 30.0,
+                            "", 0,
+                            com.calamity.weather.data.api.openweather.subclasses.onecall.CurrentWeather(
+                                0, 0, 0, i.toDouble(), 0.0, 0.0, 0, .0F, 0, 0F, 0F,
+                                listOf(), null
+                            ),
+                            listOf(), listOf(), false, cityName = "City Name $i"
+                        )
+                    )
+                }
+            }*/
             dao.getWeatherAsList().toList().forEach { weather ->
                 service.getWeather(OpenweatherRetrofitClientInstance.API_KEY, weather.latitude, weather.longitude,Variables.exclude,Variables.units, Variables.languageCode)
                         .enqueue{

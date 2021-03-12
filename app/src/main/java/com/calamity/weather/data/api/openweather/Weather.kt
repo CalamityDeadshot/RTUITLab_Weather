@@ -8,7 +8,6 @@ import com.calamity.weather.data.api.openweather.subclasses.onecall.HourlyWeathe
 import com.google.gson.annotations.SerializedName
 @Entity(tableName = "weather")
 data class Weather(
-    @PrimaryKey(autoGenerate = true) var id: Int = 0,
     @SerializedName("lat") var latitude: Double,
     @SerializedName("lon") var longitude: Double,
     @SerializedName("timezone") var timezone: String,
@@ -17,6 +16,7 @@ data class Weather(
     @SerializedName("hourly") var hourly: List<HourlyWeather>,
     @SerializedName("daily") var daily: List<DailyWeather>,
     var isLocationEntry: Boolean,
+    @PrimaryKey(autoGenerate = true) var id: Int = 0,
     // Obtained from Places API, used to display location name to provide
     // consistency because Places name and openweather name differ
     var cityName: String = "",
