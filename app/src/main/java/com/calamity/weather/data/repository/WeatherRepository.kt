@@ -142,7 +142,7 @@ class WeatherRepository @Inject constructor(
     // Openweather APIs do not allow getting location name when using OneCall API,
     // so to get full weather info by user's location we need two API calls:
     // first - to current weather, second - to OneCall
-    suspend fun getWeatherByLocation(lat: Double, lon: Double) {
+    suspend fun getWeatherByLocation(lat: Double, lon: Double, onFinish: () -> Unit) {
         withContext(Dispatchers.IO) {
             // First call current weather info to get name
             service.getCurrentWeather(OpenweatherRetrofitClientInstance.API_KEY, lat, lon, Variables.units, Variables.languageCode)
@@ -190,6 +190,7 @@ class WeatherRepository @Inject constructor(
                                     }
 
                             }
+                            onFinish.invoke()
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 package com.calamity.weather.ui.weather
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.data.repository.WeatherRepository
@@ -25,6 +26,7 @@ class WeatherViewModel @Inject constructor (
     val weather = weatherFlow.asLiveData()
 
     private val observer = Observer<List<Weather>> {
+        Log.v("ViewModel", "observed ${busy.value}")
         busy.value = false
     }
 
@@ -39,7 +41,9 @@ class WeatherViewModel @Inject constructor (
 
     suspend fun addGpsWeather(lat: Double, lon: Double) {
         busy.value = true
-        repository.getWeatherByLocation(lat, lon)
+        repository.getWeatherByLocation(lat, lon) {
+            busy.postValue(false)
+        }
     }
 
     fun onEntrySwiped(weather: Weather) = viewModelScope.launch {
