@@ -82,16 +82,17 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             tools:expansion_expanded="true"
-            android:layout_marginTop="-16dp">
+            android:layout_marginTop="-32dp">
 
             <RelativeLayout
+                android:id="@+id/city_content_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="36dp"
+                android:paddingTop="56dp"
                 android:paddingBottom="16dp"
                 android:paddingEnd="16dp"
                 android:paddingStart="16dp"
-                android:background="@android:color/holo_purple"
+                android:background="@drawable/background_city_content"
                 android:clipToPadding="false"
                 android:clipChildren="false">
 

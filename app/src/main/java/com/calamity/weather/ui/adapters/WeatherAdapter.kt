@@ -81,19 +81,25 @@ class WeatherAdapter(
                 )
                 temperature.text = "${weather.weather.temperature.roundToInt()}°"
                 if (weather.daily.isNotEmpty()) {
-                    conditions.text = weather.weather.weatherConditions[0].description.capitalize(Locale.getDefault())
+                    conditions.text = weather.weather.weatherConditions[0].description.capitalize(
+                        Locale.getDefault()
+                    )
                     expansionsCollection.add(expansionLayout)
 
                     val todayData = weather.daily[0]
                     today.text =
-                        "${context.resources.getString(R.string.today)} · ${todayData.weatherConditions[0].description.capitalize(Locale.getDefault())}"
+                        "${context.resources.getString(R.string.today)} · ${todayData.weatherConditions[0].description.capitalize(
+                            Locale.getDefault()
+                        )}"
                     temperatureMinmaxToday.text =
                         "${todayData.temperature.max.roundToInt()}° / ${todayData.temperature.min.roundToInt()}°"
 
                     val tomorrowData = weather.daily[1]
 
                     tomorrow.text =
-                        "${context.resources.getString(R.string.tomorrow)} · ${tomorrowData.weatherConditions[0].description.capitalize(Locale.getDefault())}"
+                        "${context.resources.getString(R.string.tomorrow)} · ${tomorrowData.weatherConditions[0].description.capitalize(
+                            Locale.getDefault()
+                        )}"
                     temperatureMinmaxTomorrow.text =
                         "${tomorrowData.temperature.max.roundToInt()}° / ${tomorrowData.temperature.min.roundToInt()}°"
 
@@ -102,7 +108,9 @@ class WeatherAdapter(
                     val calendar = Calendar.getInstance()
                     calendar.timeInMillis = weather.weather.currentTime
                     afterTomorrow.text =
-                        "${getWeekDayName(calendar.get(Calendar.DAY_OF_WEEK))} · ${afterTomorrowData.weatherConditions[0].description.capitalize(Locale.getDefault())}"
+                        "${getWeekDayName(calendar.get(Calendar.DAY_OF_WEEK))} · ${afterTomorrowData.weatherConditions[0].description.capitalize(
+                            Locale.getDefault()
+                        )}"
 
                     temperatureMinmaxAfterTomorrow.text =
                         "${afterTomorrowData.temperature.max.roundToInt()}° / ${afterTomorrowData.temperature.min.roundToInt()}°"
@@ -156,6 +164,7 @@ class WeatherAdapter(
                     if (weather.weather.temperature.toInt() < 17) 17 else 50
                 )
                 headerLayout.backgroundTintList = ColorStateList.valueOf(color)
+                cityContentContainer.backgroundTintList = ColorStateList.valueOf(manipulateColor(color, .8f))
 
             }
         }
@@ -177,7 +186,7 @@ class WeatherAdapter(
                 isTiltGesturesEnabled = false
                 isZoomGesturesEnabled = false
             }
-            gMap.setMaxZoomPreference(15f)
+            gMap.setMinZoomPreference(8f)
             binding.map.onResume()
             setMapLocation()
         }
@@ -193,14 +202,15 @@ class WeatherAdapter(
                         ), 10f
                     )
                 )
-                setMaxZoomPreference(7f)
                 mapType = GoogleMap.MAP_TYPE_NORMAL
                 setOnMapClickListener {
-                    gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                        LatLng(
-                            weather.latitude,
-                            weather.longitude
-                        ), 10f)
+                    gMap.animateCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                            LatLng(
+                                weather.latitude,
+                                weather.longitude
+                            ), 10f
+                        )
                     )
                 }
             }
@@ -295,6 +305,19 @@ class WeatherAdapter(
             ((temp) * interval_R + minRed.coerceAtMost(maxRed)).roundToInt(),
             ((temp) * interval_G + minGreen.coerceAtMost(maxGreen)).roundToInt(),
             ((temp) * interval_B + minBlue.coerceAtMost(maxBlue)).roundToInt()
+        )
+    }
+
+    fun manipulateColor(color: Int, factor: Float): Int {
+        val a = Color.alpha(color)
+        val r = (Color.red(color) * factor).roundToInt()
+        val g = (Color.green(color) * factor).roundToInt()
+        val b = (Color.blue(color) * factor).roundToInt()
+        return Color.argb(
+            a,
+            r.coerceAtMost(255),
+            g.coerceAtMost(255),
+            b.coerceAtMost(255)
         )
     }
 
