@@ -177,6 +177,7 @@ class WeatherAdapter(
                 isTiltGesturesEnabled = false
                 isZoomGesturesEnabled = false
             }
+            gMap.setMaxZoomPreference(15f)
             binding.map.onResume()
             setMapLocation()
         }
@@ -192,14 +193,24 @@ class WeatherAdapter(
                         ), 10f
                     )
                 )
+                setMaxZoomPreference(7f)
                 mapType = GoogleMap.MAP_TYPE_NORMAL
+                setOnMapClickListener {
+                    gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                        LatLng(
+                            weather.latitude,
+                            weather.longitude
+                        ), 10f)
+                    )
+                }
             }
             superFragment.viewLifecycleOwner.lifecycleScope.launch {
                 repository.getInfo { response ->
                     gMap.addTileOverlay(TileOverlayOptions().tileProvider(
                         object : UrlTileProvider(256, 256) {
                             override fun getTileUrl(x: Int, y: Int, zoom: Int): URL {
-                                val s = "${response.host}${response.radar.past.last().path}/256/$zoom/$x/$y/1/1_1.png"
+                                val s =
+                                    "${response.host}${response.radar.past.last().path}/256/$zoom/$x/$y/1/1_1.png"
                                 return URL(s)
                             }
                         }
