@@ -52,8 +52,20 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
 
         initBinding(view)
         initListeners()
-
         requestGpsPermission()
+        setHasOptionsMenu(true)
+
+        fab_add_city.isEnabled = Variables.isNetworkConnected
+
+    }
+
+    private fun initBinding(view: View) {
+        val binding = FragmentWeatherBinding.bind(view)
+
+        if (!Variables.isNetworkConnected) switchTo(R.id.empty)
+
+        val weatherAdapter = WeatherAdapter(requireContext(), getImageMap(), this, this, this)
+
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.event.collect { event ->
@@ -66,22 +78,14 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                     }
                 }
             }
+            if (Variables.isNetworkConnected) {
+                getWeatherByLocation()
+                viewModel.update()
+            } else {
+                switchTo(R.id.empty)
+            }
         }
 
-        setHasOptionsMenu(true)
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.update()
-            getWeatherByLocation()
-        }
-
-    }
-
-    private fun initBinding(view: View) {
-        val binding = FragmentWeatherBinding.bind(view)
-
-
-        val weatherAdapter = WeatherAdapter(requireContext(), getImageMap(), this, this, this)
 
         binding.apply {
             currentWeatherRecycler.apply {
@@ -138,10 +142,13 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         }
 
         Variables.isNetworkConnectedLive.observe(viewLifecycleOwner) {
+            fab_add_city.isEnabled = it
             if (it)
-            viewLifecycleOwner.lifecycleScope.launch {
-                viewModel.update()
-            }
+                if (weatherAdapter.itemCount != 0)
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        viewModel.update()
+                    }
+                else getWeatherByLocation()
         }
 
         img_search.visibility = View.GONE
@@ -179,31 +186,22 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
             when (switcher.currentView.id) {
                 // Case empty list is visible
                 R.id.recycler_swipe_layout -> {
-                    if (isInternetAvailable()) {
+                    if (Variables.isNetworkConnected) {
                         if (!gpsPermissionGranted()) {
-                            img_no_connection.visibility = View.GONE
-                            img_no_gps.visibility = View.VISIBLE
-                            btn_retry.visibility = View.GONE
-                            text_empty.text = resources.getString(R.string.no_gps)
+                            showDeniedPermissionMessage()
                         } else {
                             getWeatherByLocation()
                         }
                     } else {
-                        img_no_connection.visibility = View.VISIBLE
-                        img_no_gps.visibility = View.GONE
-                        btn_retry.visibility = View.VISIBLE
-                        text_empty.text = resources.getString(R.string.no_internet)
+                        showNoInternetMessage()
                     }
                     switcher.showNext()
                 }
                 // Case empty message is visible: required to process Retry action
                 else -> {
-                    if (isInternetAvailable()) {
+                    if (Variables.isNetworkConnected) {
                         if (!gpsPermissionGranted()) {
-                            img_no_connection.visibility = View.GONE
-                            img_no_gps.visibility = View.VISIBLE
-                            btn_retry.visibility = View.GONE
-                            text_empty.text = resources.getString(R.string.no_gps)
+                            showDeniedPermissionMessage()
                         } else {
                             getWeatherByLocation()
                             switcher.showNext()
@@ -211,8 +209,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                     }
                 }
             }
-        } else if (switcher.currentView.id == R.id.empty)
-            switcher.showNext()
+        } else switchTo(R.id.recycler_swipe_layout)
     }
 
 
@@ -239,8 +236,9 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                 if (grantResults.isNotEmpty()
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED
                 ) {
-
-                    getWeatherByLocation()
+                    if (Variables.isNetworkConnected) {
+                        getWeatherByLocation()
+                    }
 
                 }
             }
@@ -269,8 +267,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         }
 
     }
-
-    private fun isInternetAvailable(): Boolean = Variables.isNetworkConnected
 
     private fun gpsPermissionGranted() =
             ActivityCompat.checkSelfPermission(
@@ -361,7 +357,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                             )
                             startActivity(browserIntent)
                         }
-                        setNeutralButton("Cancel") { dialog, id ->
+                        setNeutralButton(getString(R.string.cancel)) { dialog, id ->
 
                         }
                     }
@@ -415,5 +411,29 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
     override fun onDestroyView() {
         super.onDestroyView()
         searchView.setOnQueryTextListener(null)
+    }
+
+    private fun clearEmptyMessage() {
+        img_search.visibility = View.GONE
+        loading.visibility = View.GONE
+        img_no_connection.visibility = View.GONE
+        img_sad.visibility = View.GONE
+        img_no_gps.visibility = View.GONE
+        btn_retry.visibility = View.GONE
+    }
+
+    private fun showNoInternetMessage() {
+        clearEmptyMessage()
+        img_no_connection.visibility = View.VISIBLE
+        btn_retry.visibility = View.VISIBLE
+        img_sad.visibility = View.VISIBLE
+        text_empty.text = resources.getString(R.string.no_internet)
+    }
+
+    private fun showDeniedPermissionMessage() {
+        clearEmptyMessage()
+        img_no_gps.visibility = View.VISIBLE
+        img_sad.visibility = View.VISIBLE
+        text_empty.text = resources.getString(R.string.no_gps)
     }
 }

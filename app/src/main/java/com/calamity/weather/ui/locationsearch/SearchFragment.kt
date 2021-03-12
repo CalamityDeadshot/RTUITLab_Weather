@@ -165,6 +165,7 @@ class SearchFragment : Fragment(R.layout.fragment_search), CitiesAdapter.OnItemC
         clearEmptyMessage()
         img_no_connection.visibility = View.VISIBLE
         btn_retry.visibility = View.VISIBLE
+        img_sad.visibility = View.VISIBLE
         text_empty.text = resources.getString(R.string.no_internet)
     }
 
