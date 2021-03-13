@@ -34,12 +34,13 @@ class WeatherAdapter(
     private val imageMap: HashMap<String, Int>,
     private val listener: OnItemClickListener,
     private val onDatePickedListener: OnDatePickedListener,
-    private val superFragment: Fragment
+    private val superFragment: Fragment,
+    private val layoutManager: LinearLayoutManager
 ) : ListAdapter<Weather, WeatherAdapter.WeatherViewHolder>(DiffCallback()) {
 
     private val expansionsCollection = ExpansionLayoutCollection().apply { openOnlyOne(true) }
     private val repository: RainViewerRepository = RainViewerRepository()
-
+    private var expandedViewPosition = -1
     inner class WeatherViewHolder(
         private val binding: ItemWeatherBinding,
         private val dailyAdapter: DailyWeatherAdapter
@@ -49,8 +50,16 @@ class WeatherAdapter(
 
         var viewExpanded = false
         lateinit var gMap: GoogleMap
+
+        private val scroller: RecyclerView.SmoothScroller = object : LinearSmoothScroller(context) {
+            override fun getVerticalSnapPreference(): Int {
+                return SNAP_TO_START
+            }
+        }
+
         init {
             binding.apply {
+                expansionsCollection.add(expansionLayout)
                 openMapBtn.setOnClickListener {
                     listener.onClick(it, getItem(adapterPosition))
                 }
@@ -63,16 +72,42 @@ class WeatherAdapter(
                         "Time picker"
                     )
                 }
+                dailyWeatherRecycler.apply {
+                    adapter = dailyAdapter
+                    layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+                    setHasFixedSize(true)
+                    addItemDecoration(
+                        DailyWeatherAdapter.MarginItemDecoration(
+                            resources.getDimensionPixelSize(
+                                R.dimen.recyclerview_margin
+                            )
+                        )
+                    )
+                }
                 with(map) {
                     onCreate(null)
                     getMapAsync(this@WeatherViewHolder)
                 }
+                expansionLayout.addListener { _, expanded ->
+                    if (expanded) {
+                        scroller.targetPosition = adapterPosition
+                        layoutManager.startSmoothScroll(scroller)
+                    }
+                    viewExpanded = expanded
+                    expandedViewPosition = adapterPosition
+                }
+
             }
         }
 
         @SuppressLint("SetTextI18n")
         fun bind(weather: Weather) {
             binding.apply {
+                if (expandedViewPosition != -1)
+                    if (expandedViewPosition == adapterPosition)
+                        expansionLayout.expand(false, false)
+                    else expansionLayout.collapse(false, false)
+
                 // Binding text
                 locationName.text = weather.cityName
                 locationName.setCompoundDrawablesRelativeWithIntrinsicBounds(
@@ -84,7 +119,6 @@ class WeatherAdapter(
                     conditions.text = weather.weather.weatherConditions[0].description.capitalize(
                         Locale.getDefault()
                     )
-                    expansionsCollection.add(expansionLayout)
 
                     val todayData = weather.daily[0]
                     today.text =
@@ -117,29 +151,12 @@ class WeatherAdapter(
                 }
 
                 // Handling inner recycler
-                dailyWeatherRecycler.apply {
-                    adapter = dailyAdapter
-                    layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-                    setHasFixedSize(true)
-                    addItemDecoration(
-                        DailyWeatherAdapter.MarginItemDecoration(
-                            resources.getDimensionPixelSize(
-                                R.dimen.recyclerview_margin
-                            )
-                        )
-                    )
-                }
 
                 val list = ArrayList<DailyWeather>()
                 for (i in 3 until weather.daily.size) {
                     list.add(weather.daily[i])
                 }
                 dailyAdapter.submitList(list)
-
-                expansionLayout.addListener { expansionLayout, expanded ->
-                    viewExpanded = expanded
-                }
-
 
                 setMapLocation()
 
@@ -268,7 +285,6 @@ class WeatherAdapter(
         fun onDatePicked(weather: Weather, hour: Int, minute: Int)
     }
 
-
     class MarginItemDecoration(private val spaceSize: Int) : RecyclerView.ItemDecoration() {
         override fun getItemOffsets(
             outRect: Rect, view: View,
@@ -285,11 +301,9 @@ class WeatherAdapter(
             }
         }
     }
-    val TAG = "Mapping color"
-    // TODO: make work
     fun getMappedColor(t: Int, minColor: Int, maxColor: Int, from: Int, to: Int): Int {
 
-        val temp = if (t > 17) abs(t - 50) else abs(t + 50)
+        val temp = if (t >= 17) abs(t - 50) else abs(t + 50)
 
         val minRed = minColor shr 16 and 0xFF
         val minGreen = minColor shr 8 and 0xFF

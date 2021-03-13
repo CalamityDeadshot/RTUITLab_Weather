@@ -35,9 +35,8 @@ import kotlinx.android.synthetic.main.fragment_weather.*
 import kotlinx.android.synthetic.main.layout_list_empty.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.*
-import java.util.Calendar.*
+import java.util.Calendar
 import kotlin.collections.HashMap
 
 
@@ -64,7 +63,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
 
         if (!Variables.isNetworkConnected) switchTo(R.id.empty)
 
-        val weatherAdapter = WeatherAdapter(requireContext(), getImageMap(), this, this, this)
+        val manager = LinearLayoutManager(requireContext())
+        val weatherAdapter = WeatherAdapter(requireContext(), getImageMap(), this, this, this, manager)
 
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
@@ -90,7 +90,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         binding.apply {
             currentWeatherRecycler.apply {
                 adapter = weatherAdapter
-                layoutManager = LinearLayoutManager(requireContext())
+                layoutManager = manager
                 setHasFixedSize(true)
                 addItemDecoration(
                     WeatherAdapter.MarginItemDecoration(
@@ -304,7 +304,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         }
     }
 
-    fun getImageMap(): HashMap<String, Int> {
+    private fun getImageMap(): HashMap<String, Int> {
         val map = HashMap<String, Int>()
         map["01d"] = R.drawable.ic_01d
         map["01n"] = R.drawable.ic_01n
@@ -333,7 +333,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                 val alertDialog: AlertDialog = activity.let {
                     val builder = AlertDialog.Builder(it)
                     builder.apply {
-                        setPositiveButton(getString(R.string.google)) { dialog, id ->
+                        setPositiveButton(getString(R.string.google)) { _, _ ->
                             val browserIntent = Intent(
                                 Intent.ACTION_VIEW, Uri.parse(
                                     constructGoogleMapsUri(
@@ -345,7 +345,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                             )
                             startActivity(browserIntent)
                         }
-                        setNegativeButton(getString(R.string.yandex)) { dialog, id ->
+                        setNegativeButton(getString(R.string.yandex)) { _, _ ->
                             val browserIntent = Intent(
                                 Intent.ACTION_VIEW, Uri.parse(
                                     constructYandexMapsUri(
@@ -357,7 +357,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                             )
                             startActivity(browserIntent)
                         }
-                        setNeutralButton(getString(R.string.cancel)) { dialog, id ->
+                        setNeutralButton(getString(R.string.cancel)) { _, _ ->
 
                         }
                     }
@@ -375,8 +375,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         val datetimeToAlarm = Calendar.getInstance(Locale.getDefault())
         datetimeToAlarm.set(Calendar.HOUR_OF_DAY, hour)
         datetimeToAlarm.set(Calendar.MINUTE, minute)
-        datetimeToAlarm.set(SECOND, 0)
-        datetimeToAlarm.set(MILLISECOND, 0)
+        datetimeToAlarm.set(Calendar.SECOND, 0)
+        datetimeToAlarm.set(Calendar.MILLISECOND, 0)
 
         NotificationHelper.createNotificationChannel(
             requireContext(),
