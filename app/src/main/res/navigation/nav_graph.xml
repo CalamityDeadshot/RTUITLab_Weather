@@ -17,10 +17,23 @@
             app:exitAnim="@anim/to_left"
             app:popEnterAnim="@anim/from_left"
             app:popExitAnim="@anim/to_right" />
+        <action
+            android:id="@+id/action_currentWeatherFragment_to_precipitationMapFragment"
+            app:destination="@id/precipitationMapFragment" />
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.calamity.weather.ui.locationsearch.SearchFragment"
         android:label="@string/add_city"
         tools:layout="@layout/fragment_search" />
+    <fragment
+        android:id="@+id/precipitationMapFragment"
+        android:name="com.calamity.weather.ui.map.PrecipitationMapFragment"
+        android:label="@string/precipitation_map"
+        tools:layout="@layout/fragment_precipitation_map">
+        <argument
+            android:name="id"
+            app:argType="integer"
+            android:defaultValue="-1"/>
+    </fragment>
 </navigation>

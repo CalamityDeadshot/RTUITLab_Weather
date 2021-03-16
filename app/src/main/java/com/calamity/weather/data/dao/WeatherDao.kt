@@ -13,6 +13,9 @@ interface WeatherDao {
     @Query("SELECT * FROM weather")
     fun getWeather(): Flow<List<Weather>>
 
+    @Query("SELECT * FROM weather where id = :id")
+    fun getWeatherById(id: Int): Weather
+
     @Query("SELECT * FROM weather")
     fun getWeatherAsList(): List<Weather>
 

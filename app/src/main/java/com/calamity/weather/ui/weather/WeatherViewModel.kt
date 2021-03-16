@@ -58,6 +58,13 @@ class WeatherViewModel @Inject constructor (
     private val eventChannel = Channel<WeatherEvent>()
     val event = eventChannel.receiveAsFlow()
 
+
+    fun getWeatherById(id: Int, callback: (Weather) -> Unit) = viewModelScope.launch {
+        repository.getWeatherById(id) {
+            callback(it)
+        }
+    }
+
     sealed class WeatherEvent {
         data class ShowUndoDeleteMessage(val weather: Weather) : WeatherEvent()
     }

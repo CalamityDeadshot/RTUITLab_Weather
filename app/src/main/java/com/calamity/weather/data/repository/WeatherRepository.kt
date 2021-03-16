@@ -251,6 +251,10 @@ class WeatherRepository @Inject constructor(
     }
 
 
+    fun getWeatherById(id: Int, callback: (Weather) -> Unit) = GlobalScope.launch {
+        callback(database.weatherDao().getWeatherById(id))
+    }
+
     fun getWeather() = database.weatherDao().getWeather()
 
     fun getWeather(searchQuery: String) = database.weatherDao().getWeather(searchQuery)

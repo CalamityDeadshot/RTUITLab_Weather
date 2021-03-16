@@ -7,14 +7,19 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -48,6 +53,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        postponeEnterTransition()
 
         initBinding(view)
         initListeners()
@@ -60,8 +66,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
 
     private fun initBinding(view: View) {
         val binding = FragmentWeatherBinding.bind(view)
-
-        if (!Variables.isNetworkConnected) switchTo(R.id.empty)
 
         val manager = LinearLayoutManager(requireContext())
         val weatherAdapter = WeatherAdapter(requireContext(), getImageMap(), this, this, this, manager)
@@ -134,6 +138,9 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
         viewModel.weather.observe(viewLifecycleOwner) {
             weatherAdapter.submitList(it)
             handleEmptyList(it)
+            (view.parent as ViewGroup).doOnPreDraw {
+                startPostponedEnterTransition()
+            }
         }
 
         viewModel.busy.observe(viewLifecycleOwner) {
@@ -366,6 +373,13 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                     builder.create()
                 }
                 alertDialog.show()
+            }
+            R.id.tiles_overlay -> {
+                val bundle = bundleOf("id" to weather.id, "transitionName" to weather.placeId)
+                findNavController().navigate(
+                    R.id.action_currentWeatherFragment_to_precipitationMapFragment,
+                    bundle
+                )
             }
         }
     }

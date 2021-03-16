@@ -6,22 +6,30 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Rect
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TimePicker
+import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.FragmentNavigatorExtras
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
+import androidx.transition.TransitionInflater
 import com.calamity.weather.R
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.data.api.openweather.subclasses.onecall.DailyWeather
 import com.calamity.weather.data.repository.RainViewerRepository
 import com.calamity.weather.databinding.ItemWeatherBinding
 import com.calamity.weather.ui.weather.TimePickerFragment
+import com.calamity.weather.ui.weather.WeatherFragmentDirections
 import com.github.florent37.expansionpanel.viewgroup.ExpansionLayoutCollection
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
 import java.net.URL
 import java.util.*
@@ -41,6 +49,11 @@ class WeatherAdapter(
     private val expansionsCollection = ExpansionLayoutCollection().apply { openOnlyOne(true) }
     private val repository: RainViewerRepository = RainViewerRepository()
     private var expandedViewPosition = -1
+
+    private val sharedElementReturnTransition =
+    TransitionInflater.from(context).inflateTransition(android.R.transition.move)
+
+
     inner class WeatherViewHolder(
         private val binding: ItemWeatherBinding,
         private val dailyAdapter: DailyWeatherAdapter
@@ -49,7 +62,7 @@ class WeatherAdapter(
     ), TimePickerDialog.OnTimeSetListener, OnMapReadyCallback {
 
         var viewExpanded = false
-        lateinit var gMap: GoogleMap
+        var gMap: GoogleMap? = null
 
         private val scroller: RecyclerView.SmoothScroller = object : LinearSmoothScroller(context) {
             override fun getVerticalSnapPreference(): Int {
@@ -72,6 +85,11 @@ class WeatherAdapter(
                         "Time picker"
                     )
                 }
+
+                tilesOverlay.setOnClickListener {
+                    ViewCompat.setTransitionName(binding.map, getItem(adapterPosition).placeId)
+                    listener.onClick(it, getItem(adapterPosition))
+                }
                 dailyWeatherRecycler.apply {
                     adapter = dailyAdapter
                     layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
@@ -91,7 +109,8 @@ class WeatherAdapter(
                 expansionLayout.addListener { _, expanded ->
                     if (expanded) {
                         scroller.targetPosition = adapterPosition
-                        layoutManager.startSmoothScroll(scroller)
+                        if (adapterPosition != RecyclerView.NO_POSITION)
+                            layoutManager.startSmoothScroll(scroller)
                     }
                     viewExpanded = expanded
                     expandedViewPosition = adapterPosition
@@ -193,7 +212,7 @@ class WeatherAdapter(
         override fun onMapReady(googleMap: GoogleMap) {
             MapsInitializer.initialize(superFragment.activity)
             gMap = googleMap
-            with(gMap.uiSettings) {
+            with(gMap!!.uiSettings) {
                 isZoomControlsEnabled = true
                 isCompassEnabled = false
                 isMapToolbarEnabled = false
@@ -203,14 +222,13 @@ class WeatherAdapter(
                 isTiltGesturesEnabled = false
                 isZoomGesturesEnabled = false
             }
-            gMap.setMinZoomPreference(5f)
             binding.map.onResume()
             setMapLocation()
         }
         private fun setMapLocation() {
-            if (!::gMap.isInitialized) return
+            if (gMap == null) return
             val weather = getItem(adapterPosition)
-            with(gMap) {
+            with(gMap!!) {
                 moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(
@@ -221,7 +239,7 @@ class WeatherAdapter(
                 )
                 mapType = GoogleMap.MAP_TYPE_NORMAL
                 setOnMapClickListener {
-                    gMap.animateCamera(
+                    gMap!!.animateCamera(
                         CameraUpdateFactory.newLatLngZoom(
                             LatLng(
                                 weather.latitude,
@@ -233,15 +251,8 @@ class WeatherAdapter(
             }
             superFragment.viewLifecycleOwner.lifecycleScope.launch {
                 repository.getInfo { response ->
-                    gMap.addTileOverlay(TileOverlayOptions().tileProvider(
-                        object : UrlTileProvider(256, 256) {
-                            override fun getTileUrl(x: Int, y: Int, zoom: Int): URL {
-                                val s =
-                                    "${response.host}${response.radar.past.last().path}/256/$zoom/$x/$y/1/1_1.png"
-                                return URL(s)
-                            }
-                        }
-                    ).transparency(.5F))
+                    Picasso.get().load("${response.host}${response.radar.past.last().path}/256/10/${weather.latitude}/${weather.longitude}/1/1_1.png")
+                        .into(binding.tilesOverlay)
                 }
             }
         }
@@ -263,8 +274,8 @@ class WeatherAdapter(
     }
 
     override fun onViewRecycled(holder: WeatherViewHolder) {
-        holder.gMap.clear()
-        holder.gMap.mapType = GoogleMap.MAP_TYPE_NONE
+        holder.gMap?.clear()
+        holder.gMap?.mapType = GoogleMap.MAP_TYPE_NONE
         super.onViewRecycled(holder)
     }
 
