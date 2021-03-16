@@ -117,14 +117,4 @@ class PrecipitationMapFragment : Fragment(R.layout.fragment_precipitation_map), 
         }
     }
 
-    override fun onPause() {
-        map.onPause()
-        super.onPause()
-    }
-
-    override fun onStop() {
-        map.onStop()
-        super.onStop()
-    }
-
 }
