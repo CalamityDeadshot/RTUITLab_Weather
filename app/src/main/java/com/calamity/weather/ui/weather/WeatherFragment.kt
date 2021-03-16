@@ -7,19 +7,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
-import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -381,6 +378,24 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                     bundle
                 )
             }
+            R.id.notify -> {
+                val alertDialog: AlertDialog = activity.let {
+                    val builder = AlertDialog.Builder(it)
+                    builder.apply {
+                        setPositiveButton(getString(android.R.string.ok)) { _, _ ->
+                            NotificationHelper.deleteScheduledNotification(requireContext(), weather)
+                            viewModel.onNotificationAction(weather, false)
+                        }
+                        setNegativeButton(getString(android.R.string.cancel)) { _, _ ->
+
+                        }
+                    }
+                    builder.setMessage(getString(R.string.notification_delete_msg))
+                        .setTitle(getString(R.string.are_you_sure))
+                    builder.create()
+                }
+                alertDialog.show()
+            }
         }
     }
 
@@ -406,6 +421,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
             24 * 60* 60 * 1000, // 1 day
             weather
         )
+
+        viewModel.onNotificationAction(weather, true)
 
         Toast.makeText(
             requireContext(),

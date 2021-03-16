@@ -101,5 +101,13 @@ class NotificationHelper {
                     "${SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault()).format(timeOfNotification.timeInMillis)} and interval " +
                     SimpleDateFormat("MM-dd hh:mm:ss", Locale.getDefault()).format(repeatInterval))
         }
+
+        fun deleteScheduledNotification(context: Context, data: Weather) {
+            val intent = Intent(context, AlarmReceiver::class.java)
+            val pending =
+                PendingIntent.getBroadcast(context, data.id, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            manager.cancel(pending)
+        }
     }
 }

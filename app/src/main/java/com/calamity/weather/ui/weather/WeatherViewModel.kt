@@ -65,6 +65,10 @@ class WeatherViewModel @Inject constructor (
         }
     }
 
+    fun onNotificationAction(entry: Weather, isSet: Boolean) = viewModelScope.launch {
+        repository.update(entry, isSet)
+    }
+
     sealed class WeatherEvent {
         data class ShowUndoDeleteMessage(val weather: Weather) : WeatherEvent()
     }

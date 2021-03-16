@@ -144,7 +144,8 @@ class WeatherRepository @Inject constructor(
                                         isLocationEntry = weather.isLocationEntry,
                                         placeId = weather.placeId,
                                         cityName = weather.cityName,
-                                        cityId = weather.cityId
+                                        cityId = weather.cityId,
+                                        notificationSet = weather.notificationSet
                                     ))
                                 }
                             }
@@ -256,7 +257,8 @@ class WeatherRepository @Inject constructor(
     fun insert(weather: Weather) = GlobalScope.launch {
         database.weatherDao().insert(weather)
     }
-
+    suspend fun update(entry: Weather, notificationSet: Boolean) =
+        database.weatherDao().update(entry.copy(notificationSet = notificationSet, id = entry.id))
 
     fun getWeatherById(id: Int, callback: (Weather) -> Unit) = GlobalScope.launch {
         callback(database.weatherDao().getWeatherById(id))

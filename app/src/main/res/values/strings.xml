@@ -39,6 +39,9 @@
     <string name="deleted">Deleted</string>
     <string name="undo">Undo</string>
     <string name="cancel">Cancel</string>
+    <string name="remove_notification">Remove notification</string>
+    <string name="notification_delete_msg">Are you sure you want to delete scheduled notification?</string>
+    <string name="are_you_sure">Are you sure?</string>
 
 
 </resources>

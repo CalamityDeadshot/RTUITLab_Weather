@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "49a12c2ba3ef7e37629e30af2bd1ceec",
+    "identityHash": "f22e5e8ae1c7f7f33e7e26d8059d437c",
     "entities": [
       {
         "tableName": "current_weather",
@@ -104,14 +104,8 @@
       },
       {
         "tableName": "weather",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `timezone` TEXT NOT NULL, `timezoneOffset` INTEGER NOT NULL, `weather` TEXT NOT NULL, `hourly` TEXT NOT NULL, `daily` TEXT NOT NULL, `isLocationEntry` INTEGER NOT NULL, `cityName` TEXT NOT NULL, `cityId` INTEGER NOT NULL, `placeId` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `timezone` TEXT NOT NULL, `timezoneOffset` INTEGER NOT NULL, `weather` TEXT NOT NULL, `hourly` TEXT NOT NULL, `daily` TEXT NOT NULL, `isLocationEntry` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cityName` TEXT NOT NULL, `cityId` INTEGER NOT NULL, `placeId` TEXT, `notificationSet` INTEGER NOT NULL)",
         "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
           {
             "fieldPath": "latitude",
             "columnName": "latitude",
@@ -161,6 +155,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "cityName",
             "columnName": "cityName",
             "affinity": "TEXT",
@@ -177,6 +177,12 @@
             "columnName": "placeId",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "notificationSet",
+            "columnName": "notificationSet",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -192,7 +198,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '49a12c2ba3ef7e37629e30af2bd1ceec')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f22e5e8ae1c7f7f33e7e26d8059d437c')"
     ]
   }
 }

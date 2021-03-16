@@ -23,7 +23,8 @@ data class Weather(
     var cityId: Int = 0,
 
     // Places API place ID
-    var placeId: String? = null
+    var placeId: String? = null,
+    var notificationSet: Boolean = false
 ) {
 
 }

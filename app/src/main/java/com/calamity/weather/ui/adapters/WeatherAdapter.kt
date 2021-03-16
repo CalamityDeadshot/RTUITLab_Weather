@@ -50,9 +50,6 @@ class WeatherAdapter(
     private val repository: RainViewerRepository = RainViewerRepository()
     private var expandedViewPosition = -1
 
-    private val sharedElementReturnTransition =
-    TransitionInflater.from(context).inflateTransition(android.R.transition.move)
-
 
     inner class WeatherViewHolder(
         private val binding: ItemWeatherBinding,
@@ -77,13 +74,19 @@ class WeatherAdapter(
                     listener.onClick(it, getItem(adapterPosition))
                 }
                 notify.setOnClickListener {
-                    /*val action = WeatherFragmentDirections.actionCurrentWeatherFragmentToTimePickerDialog()
-                    superFragment.findNavController().navigate(action)*/
-                    // We use this instead of commented code because using NavigationComponent there is no way to set a listener in a meaningful way
-                    TimePickerFragment(this@WeatherViewHolder).show(
-                        superFragment.childFragmentManager,
-                        "Time picker"
-                    )
+
+                    if (getItem(adapterPosition).notificationSet) {
+                        listener.onClick(it, getItem(adapterPosition))
+                    } else {
+
+                        /*val action = WeatherFragmentDirections.actionCurrentWeatherFragmentToTimePickerDialog()
+                        superFragment.findNavController().navigate(action)*/
+                        // We use this instead of commented code because using NavigationComponent there is no way to set a listener in a meaningful way
+                        TimePickerFragment(this@WeatherViewHolder).show(
+                            superFragment.childFragmentManager,
+                            "Time picker"
+                        )
+                    }
                 }
 
                 tilesOverlay.setOnClickListener {
@@ -134,6 +137,9 @@ class WeatherAdapter(
                     0, 0, 0
                 )
                 temperature.text = "${weather.weather.temperature.roundToInt()}°"
+                notify.text =
+                    if (!weather.notificationSet) context.getString(R.string.schedule_notification)
+                    else context.getString(R.string.remove_notification)
                 if (weather.daily.isNotEmpty()) {
                     conditions.text = weather.weather.weatherConditions[0].description.capitalize(
                         Locale.getDefault()

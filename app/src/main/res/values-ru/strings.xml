@@ -37,4 +37,7 @@
     <string name="deleted">Удалено</string>
     <string name="undo">Отмена</string>
     <string name="cancel">Отмена</string>
+    <string name="remove_notification">Удалить уведомление</string>
+    <string name="notification_delete_msg">Вы уверены, что хотите удалить запланированное уведомление?</string>
+    <string name="are_you_sure">Вы уверены?</string>
 </resources>
