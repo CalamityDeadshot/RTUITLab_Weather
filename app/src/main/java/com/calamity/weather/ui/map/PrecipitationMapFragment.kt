@@ -117,4 +117,11 @@ class PrecipitationMapFragment : Fragment(R.layout.fragment_precipitation_map), 
         }
     }
 
+    override fun onDestroyView() {
+        gMap?.clear()
+        map?.onDestroy()
+
+        super.onDestroyView()
+    }
+
 }
