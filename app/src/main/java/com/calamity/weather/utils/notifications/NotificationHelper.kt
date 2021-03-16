@@ -15,7 +15,6 @@ import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.ui.mainactivity.MainActivity
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.roundToInt
 
 
 class NotificationHelper {
@@ -66,7 +65,7 @@ class NotificationHelper {
 
             Log.v("Notifications", "Fired notification creation with following parameters: $title, $message, $channelId, $id")
             val notificationBuilder = NotificationCompat.Builder(context, channelId).apply {
-                setSmallIcon(R.drawable.ic_launcher_foreground)
+                setSmallIcon(R.mipmap.ic_launcher)
                 setContentTitle(title)
                 setContentText(message)
                 setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
