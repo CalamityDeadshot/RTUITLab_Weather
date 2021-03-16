@@ -226,7 +226,7 @@ class WeatherAdapter(
             setMapLocation()
         }
         private fun setMapLocation() {
-            if (gMap == null) return
+            if (gMap == null || adapterPosition == RecyclerView.NO_POSITION) return
             val weather = getItem(adapterPosition)
             with(gMap!!) {
                 moveCamera(
