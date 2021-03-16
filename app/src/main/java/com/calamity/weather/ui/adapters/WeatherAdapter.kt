@@ -122,7 +122,7 @@ class WeatherAdapter(
         @SuppressLint("SetTextI18n")
         fun bind(weather: Weather) {
             binding.apply {
-                if (expandedViewPosition != -1)
+                if (viewExpanded && expandedViewPosition != -1)
                     if (expandedViewPosition == adapterPosition)
                         expansionLayout.expand(false, false)
                     else expansionLayout.collapse(false, false)
