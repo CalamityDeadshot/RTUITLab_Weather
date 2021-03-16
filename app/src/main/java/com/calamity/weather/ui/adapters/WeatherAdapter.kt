@@ -159,11 +159,9 @@ class WeatherAdapter(
 
                     val afterTomorrowData = weather.daily[2]
                     val calendar = Calendar.getInstance()
-                    calendar.timeInMillis = weather.weather.currentTime
+                    calendar.add(Calendar.DAY_OF_WEEK, 2)
                     afterTomorrow.text =
-                        "${getWeekDayName(calendar.get(Calendar.DAY_OF_WEEK))} · ${afterTomorrowData.weatherConditions[0].description.capitalize(
-                            Locale.getDefault()
-                        )}"
+                        "${getWeekDayName(calendar.get(Calendar.DAY_OF_WEEK))} · ${afterTomorrowData.weatherConditions[0].description.capitalize(Locale.getDefault())}"
 
                     temperatureMinmaxAfterTomorrow.text =
                         "${afterTomorrowData.temperature.max.roundToInt()}° / ${afterTomorrowData.temperature.min.roundToInt()}°"
