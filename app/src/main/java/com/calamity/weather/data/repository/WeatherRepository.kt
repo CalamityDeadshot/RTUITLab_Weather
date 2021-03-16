@@ -193,6 +193,7 @@ class WeatherRepository @Inject constructor(
                                     .enqueue {
                                         onResponse = { oneCallResponse ->
                                             GlobalScope.launch {
+                                                ensureLocationEntryIsSingle(oneCallResponse.body()!!)
                                                 database.weatherDao().insert(
                                                     oneCallResponse.body()!!.apply { // Copy name and ID from current weather
                                                         isLocationEntry = true
@@ -210,6 +211,12 @@ class WeatherRepository @Inject constructor(
                         }
                     }
                 }
+        }
+    }
+
+    private suspend fun ensureLocationEntryIsSingle(entry: Weather) {
+        database.weatherDao().getWeatherAsList().forEach {
+            if (it.placeId == entry.placeId) database.weatherDao().delete(it)
         }
     }
 
