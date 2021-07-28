@@ -81,7 +81,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                 }
             }
             if (Variables.isNetworkConnected) {
-                getWeatherByLocation()
                 viewModel.update()
             } else {
                 switchTo(R.id.empty)
