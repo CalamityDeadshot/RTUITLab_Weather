@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 import java.util.Calendar
 import kotlin.collections.HashMap
+import androidx.lifecycle.Observer
 
 
 @AndroidEntryPoint
@@ -80,7 +81,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                 }
             }
             if (Variables.isNetworkConnected) {
-                getWeatherByLocation()
                 viewModel.update()
             } else {
                 switchTo(R.id.empty)
@@ -132,20 +132,20 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
             }).attachToRecyclerView(currentWeatherRecycler)
         }
 
-        viewModel.weather.observe(viewLifecycleOwner) {
+        viewModel.weather.observe(viewLifecycleOwner, Observer { it ->
             weatherAdapter.submitList(it)
             handleEmptyList(it)
             (view.parent as ViewGroup).doOnPreDraw {
                 startPostponedEnterTransition()
             }
-        }
+        })
 
-        viewModel.busy.observe(viewLifecycleOwner) {
+        viewModel.busy.observe(viewLifecycleOwner, Observer {
             switchTo(R.id.recycler_swipe_layout)
             recycler_swipe_layout.isRefreshing = it
-        }
+        })
 
-        Variables.isNetworkConnectedLive.observe(viewLifecycleOwner) {
+        Variables.isNetworkConnectedLive.observe(viewLifecycleOwner, Observer {
             fab_add_city.isEnabled = it
             if (it)
                 if (weatherAdapter.itemCount != 0)
@@ -153,7 +153,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), WeatherAdapter.OnIt
                         viewModel.update()
                     }
                 else getWeatherByLocation()
-        }
+        })
 
         img_search.visibility = View.GONE
         loading.visibility = View.GONE

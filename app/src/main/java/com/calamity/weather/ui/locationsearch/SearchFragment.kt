@@ -7,6 +7,7 @@ import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.calamity.weather.R
@@ -67,10 +68,10 @@ class SearchFragment : Fragment(R.layout.fragment_search), CitiesAdapter.OnItemC
             }
         }
 
-        viewModel.predictions.observe(viewLifecycleOwner) {
+        viewModel.predictions.observe(viewLifecycleOwner, Observer {
             citiesAdapter.submitList(it)
             handleEmptyList(it)
-        }
+        })
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.event.collect { event ->
@@ -84,7 +85,7 @@ class SearchFragment : Fragment(R.layout.fragment_search), CitiesAdapter.OnItemC
         }
 
         if (!Variables.isNetworkConnected) showNoInternetMessage()
-        Variables.isNetworkConnectedLive.observe(viewLifecycleOwner) {
+        Variables.isNetworkConnectedLive.observe(viewLifecycleOwner, Observer {
             if (it) {
                 if (viewModel.hasQuery.value!!) {
                     switchTo(R.id.cities_recycler)
@@ -97,10 +98,10 @@ class SearchFragment : Fragment(R.layout.fragment_search), CitiesAdapter.OnItemC
                 switchTo(R.id.empty)
                 showNoInternetMessage()
             }
-        }
+        })
 
-        viewModel.busy.observe(viewLifecycleOwner) {
-            if (!Variables.isNetworkConnected) return@observe
+        viewModel.busy.observe(viewLifecycleOwner, Observer {
+            if (!Variables.isNetworkConnected) return@Observer
             if (it) {
                 if (viewModel.hasQuery.value!!) showLoadingEmptyMessage()
             } else {
@@ -110,7 +111,7 @@ class SearchFragment : Fragment(R.layout.fragment_search), CitiesAdapter.OnItemC
                     showNoResultsEmptyMessage()
                 }
             }
-        }
+        })
 
         img_no_gps.visibility = View.GONE
 
