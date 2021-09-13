@@ -3,6 +3,7 @@ package com.calamity.weather.utils
 import android.util.Log
 import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.MutableLiveData
+import com.calamity.weather.BuildConfig
 import kotlin.properties.Delegates
 
 object Variables {
@@ -22,5 +23,5 @@ object Variables {
     const val googleMapsUrl = "https://www.google.com/maps/@?api=1&map_action=map"
     const val yandexMapsUrl = "yandexmaps://maps.yandex.com/?"
 
-    const val googleApiKey = "AIzaSyCoOd_Nq07amOuqQlO14Dm3C__DUW9wz84"
+    val googleApiKey: String = BuildConfig.MAPS_API_KEY
 }

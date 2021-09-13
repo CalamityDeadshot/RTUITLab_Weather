@@ -29,6 +29,9 @@ android {
                 arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
         }
+
+        buildConfigField("String", "MAPS_API_KEY", MAPS_API_KEY)
+        buildConfigField("String", "OPENWEATHER_API_KEY", OPENWEATHER_API_KEY)
     }
 
     buildTypes {
