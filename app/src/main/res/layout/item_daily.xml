@@ -7,7 +7,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="4dp"
-        tools:background="@color/black">
+        tools:background="@drawable/background_city_content">
 
         <TextView
             android:id="@+id/day_of_week"

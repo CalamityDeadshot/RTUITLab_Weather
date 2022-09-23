@@ -46,7 +46,7 @@ class SearchViewModel @Inject constructor(
         predictions.observeForever(observer)
     }
 
-    suspend fun onAddPlace(place: PlacesPrediction, added: Boolean) {
+    fun onAddPlace(place: PlacesPrediction, added: Boolean) {
         viewModelScope.launch {
             repository.update(place, added)
             if (added) weatherRepository.addWeather(place)

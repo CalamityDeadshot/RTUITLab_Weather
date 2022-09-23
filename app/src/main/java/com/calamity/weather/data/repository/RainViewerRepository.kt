@@ -10,11 +10,11 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
-class RainViewerRepository @Inject constructor() {
+class RainViewerRepository @Inject constructor(): RainViewerRepositoryInterface {
     private val service: RainViewerService = RainviewerRetrofitClientInstance.getRetrofitInstance()!!.create(
         RainViewerService::class.java)
 
-    suspend fun getInfo(onResponseListener: (RainviewerRoot) -> Unit) {
+    override suspend fun getInfo(onResponseListener: (RainviewerRoot) -> Unit) {
         withContext(Dispatchers.IO) {
             service.getPrecipitationInfo().enqueue {
                 onResponse = { response ->

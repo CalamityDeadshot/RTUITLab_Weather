@@ -19,13 +19,13 @@ import javax.inject.Inject
 
 class WeatherRepository @Inject constructor(
     private val database: WeatherDatabase,
-) {
+) : WeatherRepositoryInterface {
     private val service: WeatherService = OpenweatherRetrofitClientInstance.getRetrofitInstance()!!.create(
         WeatherService::class.java)
 
     // Methods belonging to current weather API call
 
-    suspend fun refreshCurrentWeather() {
+    override suspend fun refreshCurrentWeather() {
         withContext(Dispatchers.IO) {
             val currentDao = database.currentWeatherDao()
             currentDao.getCurrentWeatherAsList().toList().forEach { weather ->
@@ -49,7 +49,7 @@ class WeatherRepository @Inject constructor(
         }
     }
 
-    suspend fun getCurrentWeatherByLocation(lat: Double, lon: Double) {
+    override suspend fun getCurrentWeatherByLocation(lat: Double, lon: Double) {
         withContext(Dispatchers.IO) {
             service.getCurrentWeather(OpenweatherRetrofitClientInstance.API_KEY, lat, lon, Variables.units, Variables.languageCode)
                 .enqueue {
@@ -79,7 +79,7 @@ class WeatherRepository @Inject constructor(
     }
 
 
-    suspend fun addCurrentWeather(place: PlacesPrediction) {
+    override suspend fun addCurrentWeather(place: PlacesPrediction) {
         withContext(Dispatchers.IO) {
             service.getCurrentWeather(OpenweatherRetrofitClientInstance.API_KEY, place.latitude, place.longitude, Variables.units, Variables.languageCode)
                 .enqueue{
@@ -93,7 +93,7 @@ class WeatherRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteCurrent(place: PlacesPrediction) {
+    override suspend fun deleteCurrent(place: PlacesPrediction) {
         withContext(Dispatchers.IO) {
             for (weather in database.currentWeatherDao().getCurrentWeatherAsList()) {
                 if (weather.placeId == place.placeId)
@@ -102,20 +102,20 @@ class WeatherRepository @Inject constructor(
         }
     }
 
-    fun deleteCurrent(weather: CurrentWeather) = GlobalScope.launch {
+    override fun deleteCurrent(weather: CurrentWeather) = GlobalScope.launch {
         database.currentWeatherDao().delete(weather)
     }
 
-    fun insertCurrent(weather: CurrentWeather) = GlobalScope.launch {
+    override fun insertCurrent(weather: CurrentWeather) = GlobalScope.launch {
         database.currentWeatherDao().insert(weather)
     }
 
-    fun getCurrentWeather(searchQuery: String) = database.currentWeatherDao().getCurrentWeather(searchQuery)
+    override fun getCurrentWeather(searchQuery: String) = database.currentWeatherDao().getCurrentWeather(searchQuery)
 
 
     // Methods belonging to OneCall API
 
-    suspend fun refreshWeather() {
+    override suspend fun refreshWeather() {
         withContext(Dispatchers.IO) {
             val dao = database.weatherDao()
             // Mock data
@@ -134,7 +134,7 @@ class WeatherRepository @Inject constructor(
                     )
                 }
             }*/
-            dao.getWeatherAsList().toList().forEach { weather ->
+            dao.getWeatherAsList().forEach { weather ->
                 service.getWeather(OpenweatherRetrofitClientInstance.API_KEY, weather.latitude, weather.longitude,Variables.exclude,Variables.units, Variables.languageCode)
                         .enqueue{
                             onResponse = { response ->
@@ -159,7 +159,7 @@ class WeatherRepository @Inject constructor(
     // Openweather APIs do not allow getting location name when using OneCall API,
     // so to get full weather info by user's location we need two API calls:
     // first - to current weather, second - to OneCall
-    suspend fun getWeatherByLocation(lat: Double, lon: Double, onFinish: () -> Unit) {
+    override suspend fun getWeatherByLocation(lat: Double, lon: Double, onFinish: () -> Unit) {
         withContext(Dispatchers.IO) {
             // First call current weather info to get name
             service.getCurrentWeather(OpenweatherRetrofitClientInstance.API_KEY, lat, lon, Variables.units, Variables.languageCode)
@@ -222,50 +222,45 @@ class WeatherRepository @Inject constructor(
     }
 
     // This method is used to add new entries from Search screen
-    suspend fun addWeather(place: PlacesPrediction) {
-        withContext(Dispatchers.IO) {
-            service.getWeather(OpenweatherRetrofitClientInstance.API_KEY, place.latitude, place.longitude, Variables.exclude, Variables.units, Variables.languageCode)
-                .enqueue{
-                    onResponse = { response ->
+    override suspend fun addWeather(place: PlacesPrediction) = withContext(Dispatchers.IO) {
+        service.getWeather(OpenweatherRetrofitClientInstance.API_KEY, place.latitude, place.longitude, Variables.exclude, Variables.units, Variables.languageCode)
+            .enqueue{
+                onResponse = { response ->
 
-                        GlobalScope.launch {
-                            val w = response.body()!!.apply {
-                                placeId = place.placeId
-                                cityName = place.fullText.split(", ")[0]
-                            }
-                            Log.v("Add weather", w.toString())
-                            database.weatherDao().insert(w)
+                    GlobalScope.launch {
+                        val w = response.body()!!.apply {
+                            placeId = place.placeId
+                            cityName = place.fullText.split(", ")[0]
                         }
+                        Log.v("Add weather", w.toString())
+                        database.weatherDao().insert(w)
                     }
                 }
-        }
-    }
-
-    suspend fun delete(place: PlacesPrediction) {
-        withContext(Dispatchers.IO) {
-            for (weather in database.weatherDao().getWeatherAsList()) {
-                if (weather.placeId == place.placeId)
-                    database.weatherDao().delete(weather)
             }
+    }
+
+    override suspend fun delete(place: PlacesPrediction) = withContext(Dispatchers.IO) {
+        for (weather in database.weatherDao().getWeatherAsList()) {
+            if (weather.placeId == place.placeId)
+                database.weatherDao().delete(weather)
         }
     }
 
-    fun delete(weather: Weather) = GlobalScope.launch {
-        database.weatherDao().delete(weather)
-    }
 
-    fun insert(weather: Weather) = GlobalScope.launch {
-        database.weatherDao().insert(weather)
-    }
-    suspend fun update(entry: Weather, notificationSet: Boolean) =
+    override suspend fun delete(weather: Weather) = database.weatherDao().delete(weather)
+
+    override suspend fun insert(weather: Weather) = database.weatherDao().insert(weather)
+
+    override suspend fun update(entry: Weather, notificationSet: Boolean) =
         database.weatherDao().update(entry.copy(notificationSet = notificationSet, id = entry.id))
 
-    fun getWeatherById(id: Int, callback: (Weather) -> Unit) = GlobalScope.launch {
-        callback(database.weatherDao().getWeatherById(id))
-    }
+    override suspend fun getWeatherById(id: Int, callback: (Weather) -> Unit) =
+        withContext(Dispatchers.IO) {
+            callback(database.weatherDao().getWeatherById(id))
+        }
 
-    fun getWeather() = database.weatherDao().getWeather()
+    override fun getWeather() = database.weatherDao().getWeather()
 
-    fun getWeather(searchQuery: String) = database.weatherDao().getWeather(searchQuery)
+    override fun getWeather(searchQuery: String) = database.weatherDao().getWeather(searchQuery)
 
 }

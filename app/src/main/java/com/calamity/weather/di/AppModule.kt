@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.room.Room
 import com.calamity.weather.data.database.AutocompleteDatabase
 import com.calamity.weather.data.database.WeatherDatabase
+import com.calamity.weather.data.repository.WeatherRepository
+import com.calamity.weather.data.repository.WeatherRepositoryInterface
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,6 +37,12 @@ object AppModule {
         .fallbackToDestructiveMigration()
         .addCallback(callback)
         .build()
+
+    @Provides
+    @Singleton
+    fun provideDefaultWeatherRepository(
+        db: WeatherDatabase
+    ) = WeatherRepository(db) as WeatherRepositoryInterface
 
     @Provides
     fun provideWeatherDao(db: WeatherDatabase) = db.weatherDao()

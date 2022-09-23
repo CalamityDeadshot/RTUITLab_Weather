@@ -2,19 +2,22 @@ package com.calamity.weather.ui.weather
 
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import com.calamity.weather.data.api.openweather.Weather
 import com.calamity.weather.data.repository.WeatherRepository
+import com.calamity.weather.data.repository.WeatherRepositoryInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor (
-    private val repository: WeatherRepository
+    private val repository: WeatherRepositoryInterface
 ) : ViewModel(){
 
     val searchQuery = MutableStateFlow("")

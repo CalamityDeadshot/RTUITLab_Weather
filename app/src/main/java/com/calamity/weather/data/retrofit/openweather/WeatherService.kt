@@ -23,7 +23,7 @@ interface WeatherService {
                           @Query("lang") languageCode: String
     ): Call<CurrentWeather>
 
-    @GET("weather") // By city ID
+    @GET("weather") // By city coordinates
     fun getCurrentWeather(@Query("appid") apiKey: String,
                           @Query("lat") latitude: Double,
                           @Query("lon") longitude: Double,

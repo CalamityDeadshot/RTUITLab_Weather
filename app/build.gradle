@@ -35,9 +35,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            resValue "string", "MAPS_API_KEY", MAPS_API_KEY
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            resValue "string", "MAPS_API_KEY", MAPS_API_KEY
         }
     }
     compileOptions {

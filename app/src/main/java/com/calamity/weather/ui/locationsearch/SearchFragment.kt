@@ -42,11 +42,9 @@ class SearchFragment : Fragment(R.layout.fragment_search), CitiesAdapter.OnItemC
         initBinding(view)
     }
 
-    override fun onAddClick(place: PlacesPrediction, isAdded: Boolean) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.onAddPlace(place, isAdded)
-        }
-    }
+    override fun onAddClick(place: PlacesPrediction, isAdded: Boolean) =
+        viewModel.onAddPlace(place, isAdded)
+
 
     private fun initBinding(view: View) {
         val binding = FragmentSearchBinding.bind(view)
